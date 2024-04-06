@@ -1,1 +1,13 @@
-{{yield}}
+<nav class="navbar">
+  <ul class="navbar-list">
+    <div class="project-name">
+        Roomio
+    </div>
+    <li class="navbar-item">
+      <LinkTo @route="home" class="navbar-link" @activeClass="active">Home</LinkTo>
+    </li>
+    <li class="navbar-item">
+      <LinkTo @route="about" class="navbar-link" @activeClass="active">About</LinkTo>
+    </li>
+  </ul>
+</nav>
