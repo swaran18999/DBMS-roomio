@@ -12,4 +12,5 @@ Router.map(function () {
   this.route('user', function () {
     this.route('pets');
   });
+  this.route('search');
 });

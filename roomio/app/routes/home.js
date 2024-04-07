@@ -10,12 +10,15 @@ export default Route.extend({
   actions: {
     abc() {
       console.log('abc clicked');
-      this.ajaxfw.request('/trial').then(res=>{
-        console.log(res)
-      }, err=>{
-        console.log("err");
-        console.log(err)
-      });
+      this.ajaxfw.request('/trial').then(
+        (res) => {
+          console.log(res);
+        },
+        (err) => {
+          console.log('err');
+          console.log(err);
+        }
+      );
     },
   },
 });
