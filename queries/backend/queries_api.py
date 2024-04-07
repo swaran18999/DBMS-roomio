@@ -2,6 +2,7 @@ import flask
 from flask import Flask , render_template, session, request, redirect, url_for, jsonify
 import psycopg2, hashlib, os
 from flask_cors import CORS
+import json
 
 app = Flask(__name__) 
 app.secret_key = os.urandom(24)
@@ -14,11 +15,15 @@ I've kept a put and a post for editing pet info, check which works and go about 
 '''
 @app.route('/register_pet', methods=['POST'])
 def register_pet():
+    data_dict = {}
+    for key, value in request.form.items():
+        data_dict = json.loads(key)
+
     try:
-        pet_name = request.form['pet_name']
-        pet_type = request.form['pet_type']
-        pet_size = request.form['pet_size']
-        username = request.form['username']
+        pet_name = data_dict['pet_name']
+        pet_type = data_dict['pet_type']
+        pet_size = data_dict['pet_size']
+        username = data_dict['username']
 
         query = "INSERT INTO Pets (PetName, PetType, PetSize, username) VALUES (%s, %s, %s, %s);"
         parameters = (pet_name, pet_type, pet_size, username)
