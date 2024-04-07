@@ -9,6 +9,8 @@
 ### Swaran Iyappan
 - Implemented Feature 5 (EmberJS stuff)
 - Emberjs
+- Flask to DB connecter code
+- Ember to Flask connecter code
 
 ### Ajay Krishnan Gopalan
 - Formulated Insert queries
