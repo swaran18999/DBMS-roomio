@@ -12,14 +12,16 @@ export default class SearchRoute extends Route {
   }
   @action
   handleSearchInput(event) {
-    this.controller.set('searchOutput', []);
+    this.controller.set('searchOutputUnits', []);
+    this.controller.set('searchOutputBuild', []);
+    this.controller.set('hasData', false);
     let searchInput = event.target.value;
     // console.log('Search input:', searchInput);
     let self = this;
     this.ajaxfw.request('/search_unit/' + searchInput).then(
       (res) => {
         console.log(res);
-        self.controller.set('searchOutput', res.data);
+        self.controller.set('searchOutputUnits', res.data);
         self.controller.set('hasData', true);
       },
       (err) => {
@@ -27,5 +29,16 @@ export default class SearchRoute extends Route {
         console.log(err);
       }
     );
+    this.ajaxfw.request('/search_building/' + searchInput).then(
+        (res) => {
+          console.log(res);
+          self.controller.set('searchOutputBuild', res.data);
+          self.controller.set('hasData', true);
+        },
+        (err) => {
+          console.log('err');
+          console.log(err);
+        }
+      );
   }
 }

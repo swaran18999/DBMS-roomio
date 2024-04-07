@@ -22,7 +22,25 @@
 	</tr>
 	</thead>
 		<tbody>
-	{{#each this.searchOutput as |rental|}}
+	{{#each this.searchOutputUnits as |rental|}}
+		<tr>
+			<td>{{rental.CompanyName}}</td>
+			<td>{{rental.BuildingName}}</td>
+			<td>{{rental.AddrStreet}}</td>
+			<td>{{rental.AddrCity}}</td>
+			<td>{{rental.AddrState}}</td>
+			<td>{{rental.AddrZipCode}}</td>
+			<td>{{rental.unitNumber}}</td>
+			<td>{{rental.MonthlyRent}}</td>
+			<td>{{rental.squareFootage}}</td>
+			<td>{{rental.YearBuilt}}</td>
+			{{!-- <td>{{format-date rental.AvailableDateForMoveIn "dddd, MMMM Do YYYY"}}</td> --}}
+			<td>{{rental.AvailableDateForMoveIn}}</td>
+			<td>{{rental.AmenityType}}</td>
+			<td>{{rental.AmenityDescription}}</td>
+		</tr>
+	{{/each}}
+	{{#each this.searchOutputBuild as |rental|}}
 		<tr>
 			<td>{{rental.CompanyName}}</td>
 			<td>{{rental.BuildingName}}</td>
