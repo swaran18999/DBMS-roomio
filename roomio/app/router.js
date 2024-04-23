@@ -13,4 +13,6 @@ Router.map(function () {
     this.route('pets');
   });
   this.route('search');
+  this.route('login');
+  this.route('signup');
 });

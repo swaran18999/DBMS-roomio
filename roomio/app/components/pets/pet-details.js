@@ -10,12 +10,12 @@ export default Component.extend({
   actions: {
     savePetDetails() {
       let data = {
-        'pet_name': this.petName,
-        'pet_type': this.petType,
-        'pet_size': this.petSize,
-        'username': "user1"
-       }
+        pet_name: this.petName,
+        pet_type: this.petType,
+        pet_size: this.petSize,
+        username: 'user1',
+      };
       this.savePetDetailsAPI(data);
-    }
-  }
+    },
+  },
 });

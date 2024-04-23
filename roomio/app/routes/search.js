@@ -30,15 +30,15 @@ export default class SearchRoute extends Route {
       }
     );
     this.ajaxfw.request('/search_building/' + searchInput).then(
-        (res) => {
-          console.log(res);
-          self.controller.set('searchOutputBuild', res.data);
-          self.controller.set('hasData', true);
-        },
-        (err) => {
-          console.log('err');
-          console.log(err);
-        }
-      );
+      (res) => {
+        console.log(res);
+        self.controller.set('searchOutputBuild', res.data);
+        self.controller.set('hasData', true);
+      },
+      (err) => {
+        console.log('err');
+        console.log(err);
+      }
+    );
   }
 }
