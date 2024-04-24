@@ -1,8 +1,10 @@
 import flask 
-from flask import Flask , render_template, session, request, redirect, url_for, jsonify
+from flask import Flask , render_template, request, redirect, url_for, jsonify
 import psycopg2, hashlib, os
 from flask_cors import CORS
 import json
+
+session = {}
 
 app = Flask(__name__) 
 app.secret_key = os.urandom(24)
@@ -15,8 +17,14 @@ def getEncryptedPassword(password):
 
 @app.route('/')
 def index():
-    print(session.get('loggedIn'))
-    print("This is called")
+    print("/ called", session.get('loggedIn'))
+    try:
+        if(session.get('loggedIn')):
+            return {'flag': 1, 'message': 'User is logged in'}
+        else: 
+            return {'flag': 2, 'message': 'User is not logged in'}
+    except Exception as e:
+        return {'flag': 0, 'message': e}
 
 
 @app.route('/signup' , methods = ['POST'])
