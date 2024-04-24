@@ -8,6 +8,88 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)
 
+def getEncryptedPassword(password):
+    salt = "random_salt"
+    hash_password = hashlib.sha256((password + salt).encode()).hexdigest()
+    return hash_password
+
+@app.route('/')
+def index():
+    print(session.get('loggedIn'))
+    print("This is called")
+
+
+@app.route('/signup' , methods = ['POST'])
+def signup():
+    data_dict = {}
+    for key, value in request.form.items():
+        data_dict = json.loads(key)
+    
+    userName = data_dict['newUsername']
+    password = data_dict['newPassword']
+    dob = data_dict['newDOB']
+    email = data_dict['newEmail']
+    firstName = data_dict['newFirstName']
+    lastName = data_dict['newLastName']
+    phone = data_dict['newPhone']
+    gender = data_dict['newGender']
+
+    enc_password = getEncryptedPassword(password)
+    
+    query = "INSERT INTO Users (username, first_name, last_name, DOB, gender, email, Phone, passwd) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
+
+    parameters = (userName, firstName, lastName, dob, gender, email, phone, enc_password)
+
+    result = executeQueryResult(query, parameters)
+
+    if result == True:
+        print('Register Successful !')
+        return jsonify({
+            'flag': 1,
+            'message': 'Signup successfull'
+        })
+    else:
+        print("Registration Unsuccessful !")
+        return jsonify({'flag' : 0})
+
+@app.route('/login' , methods = ['POST'])
+def login():
+    data_dict = {}
+    for key, value in request.form.items():
+        data_dict = json.loads(key)
+    username = data_dict['username']
+    password = data_dict['password']   
+
+    enc_password = getEncryptedPassword(password)
+
+    query = "SELECT username, email FROM Users WHERE username = %s and passwd = %s;"
+
+    parameters = (username, enc_password)
+
+    result = fetchQueryResult(query, parameters)
+
+    if not result == []:
+        session['username'] = result[0][0]
+        session['email'] = result[0][1]
+        session['loggedIn'] = True
+
+        return jsonify({
+            'flag': 1,
+            'message': "Successfully logged in"
+        })
+
+    else: 
+        return jsonify({'flag' : 0})
+
+@app.route('/logout', methods = ['POST'])
+def logout():
+    session['username'] = None
+    session['email'] = None
+    session['loggedIn'] = False
+
+    return jsonify({'flag' : 1, 'message': "Successfully logged out"})
+
+
 '''
 Feature 2. Register and Update Pet
 
