@@ -103,6 +103,28 @@ Feature 2. Register and Update Pet
 
 I've kept a put and a post for editing pet info, check which works and go about it
 '''
+@app.route('/get_pet', methods=['POST'])
+def get_pet():
+    try:
+        data = request.get_json()  # Get JSON data from the request body
+        username = data.get('username')  # Get the username from the JSON data
+
+        query = "SELECT * FROM Pets WHERE username = %s;"
+        parameters = (username,)
+
+        pets = fetchQueryResult(query, parameters)
+        print(pets)
+
+        if pets:
+            pet_list = [{'pet_name': pet[0], 'pet_type': pet[1], 'pet_size': pet[2]} for pet in pets]
+            return jsonify({'flag': 1, 'pets': pet_list}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No pets found for the given username'}), 404
+    except Exception as e:
+        print(f"Error getting pets: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred while getting pets {e}'}), 500
+
+
 @app.route('/register_pet', methods=['POST'])
 def register_pet():
     data_dict = {}
