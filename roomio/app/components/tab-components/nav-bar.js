@@ -3,26 +3,25 @@ import { service } from '@ember/service';
 
 export default Component.extend({
   router: service(),
-	ajaxfw: service(),
-	actions: {
+  ajaxfw: service(),
+  actions: {
     logout() {
       try {
-				this.ajaxfw.post('/logout').then(
-					(res) => {
-            if(res.flag == 1) {
-              this.router.transitionTo("login");
-            }
-            else {
+        this.ajaxfw.post('/logout').then(
+          (res) => {
+            if (res.flag == 1) {
+              this.router.transitionTo('login');
+            } else {
               console.error(res);
             }
-					},
-					(err) => {
+          },
+          (err) => {
             console.error(err);
-					}
-				);
-			} catch (error) {
+          }
+        );
+      } catch (error) {
         console.error(error);
-			}
-    }
-	},
+      }
+    },
+  },
 });

@@ -90,6 +90,7 @@ input[type="password"] {
   border: 1px solid #ccc;
   border-radius: 3px;
 }
+
 .signup-form .btn {
   display: inline-block;
   padding: 8px 20px;
