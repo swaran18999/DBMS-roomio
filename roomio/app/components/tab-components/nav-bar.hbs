@@ -15,5 +15,8 @@
     <li class="navbar-item">
       <LinkTo @route="search" class="navbar-link" @activeClass="active">Search</LinkTo>
     </li>
+    <li class="navbar-item">
+      <a class="logout-button navbar-link" {{on "click" (action "logout")}}>Logout</a>
+    </li>
   </ul>
 </nav>

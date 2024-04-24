@@ -18,6 +18,8 @@
 
   .navbar-item:last-child {
     margin-right: 0; /* Remove margin from the last navbar item */
+    padding-right: 10px;
+    margin-left: auto;
   }
 
   .navbar-item a {
