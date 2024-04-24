@@ -1,43 +1,43 @@
 .navbar {
-	background-color: #333; /* Change this to your desired background color */
-	padding: 10px;
+  background-color: #333; /* Change this to your desired background color */
+  padding: 10px;
 
-	.navbar-list {
-		list-style-type: none;
-		padding: 0;
-		margin: 0;
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-	}
+  .navbar-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
-	.navbar-item {
-		display: inline-block;
-		margin-right: 10px;
-	}
+  .navbar-item {
+    display: inline-block;
+    margin-right: 10px;
+  }
 
-	.navbar-item:last-child {
-		margin-right: 0; /* Remove margin from the last navbar item */
-	}
+  .navbar-item:last-child {
+    margin-right: 0; /* Remove margin from the last navbar item */
+  }
 
-	.navbar-item a {
-		text-decoration: none;
-		color: white; /* Change this to your desired text color */
-	}
+  .navbar-item a {
+    text-decoration: none;
+    color: white; /* Change this to your desired text color */
+  }
 
-	.navbar-item a:hover {
-		color: lightgray; /* Change this to your desired hover color */
-	}
+  .navbar-item a:hover {
+    color: lightgray; /* Change this to your desired hover color */
+  }
 
-	.active {
-		color: yellow; /* Change this to your desired color for active link */
-	}
+  .active {
+    color: yellow; /* Change this to your desired color for active link */
+  }
 
-	.project-name {
-		display: inline;
-		font-size: 32px;
-		font-weight: bold;
-		color: coral;
-		padding: 5px 30px 10px 10px;
-	}
+  .project-name {
+    display: inline;
+    font-size: 32px;
+    font-weight: bold;
+    color: coral;
+    padding: 5px 30px 10px 10px;
+  }
 }

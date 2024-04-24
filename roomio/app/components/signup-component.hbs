@@ -1,0 +1,57 @@
+<!-- app/templates/signup.hbs -->
+
+<div class="signup-page">
+  <div class="signup-form">
+    <h2>Create Account</h2>
+    <form {{action "signup" on="submit"}}>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <Input id="username" @type="text" @value={{this.newUsername}} class="form-control" required/>
+      </div>
+      <div class="form-group">
+        <label for="firstName">First Name:</label>
+        <Input id="firstName" @type="text" @value={{this.newFirstName}} class="form-control" required/>
+      </div>
+      <div class="form-group">
+        <label for="lastName">Last Name:</label>
+        <Input id="lastName" @type="text" @value={{this.newLastName}} class="form-control" required/>
+      </div>
+      <div class="form-group">
+        <label for="dob">Date of Birth:</label>
+        <Input id="dob" @type="date" @value={{this.newDOB}} class="form-control" required/>
+      </div>
+      <div class="form-group">
+        <label for="gender">Gender:</label>
+        <select class="form-control" {{on "change" (action "genderClicked")}}>
+          <option value="0">Not Known</option>
+          <option value="1">Male</option>
+          <option value="2">Female</option>
+          <option value="9">Not Applicable</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <Input id="email" @type="email" @value={{this.newEmail}} class="form-control"/>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone:</label>
+        <Input id="phone" @type="tel" @value={{this.newPhone}} class="form-control"/>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <Input id="password" @type="password" @value={{this.newPassword}} class="form-control" required/>
+      </div>
+      <div class="form-group">
+        <label for="password">Confirm Password:</label>
+        <Input id="confirm-password" @type="password" @value={{this.confirmPassword}} class="form-control" required/>
+      </div>
+      <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+    {{#if this.signupSuccess}}
+      <div class="success-message">Account created successfully. You can now <a {{action "goToLogin" on="click"}}>login</a>.</div>
+    {{/if}}
+    {{#if this.signupError}}
+      <div class="error-message">{{this.signupError}}</div>
+    {{/if}}
+  </div>
+</div>

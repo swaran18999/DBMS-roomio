@@ -4,9 +4,9 @@
 {{!-- <WelcomePage /> --}}
 {{!-- Feel free to remove this! --}}
 <div class="home">
-    {{#unless (or (eq this.target.currentPath "login") (eq this.target.currentPath "signup"))}}
+    {{#if (not (or (eq this.target.currentPath "login") (eq this.target.currentPath "signup")))}}
         {{tab-components/nav-bar}}
-    {{/unless}}
+    {{/if}}
     <div class="app">
         {{outlet}}
     </div>

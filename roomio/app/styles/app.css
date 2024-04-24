@@ -1,5 +1,6 @@
 @import url("./nav-bar.css");
 @import url("./login.css");
+
 .ember-application {
   margin: 0;
 }
@@ -8,4 +9,9 @@
   .app {
     margin: 20px;
   }
+}
+
+a {
+  color: blue;
+  cursor: pointer;
 }
