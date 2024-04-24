@@ -66,7 +66,14 @@ export default Component.extend({
 			}
 			else {
 				try {
-					this.set('signupSuccess', true);
+					this.ajaxfw.post('/signup', { data: data }).then(
+						(res) => {
+							this.set('signupSuccess', true);
+						},
+						(err) => {
+							console.log(err);
+						}
+					);
 					} catch (error) {
 						this.set('signupError', error.message);
 					}
