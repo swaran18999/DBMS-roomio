@@ -113,7 +113,7 @@ def register_pet():
         pet_name = data_dict['pet_name']
         pet_type = data_dict['pet_type']
         pet_size = data_dict['pet_size']
-        username = data_dict['username']
+        username = session['username']
 
         query = "INSERT INTO Pets (PetName, PetType, PetSize, username) VALUES (%s, %s, %s, %s);"
         parameters = (pet_name, pet_type, pet_size, username)
