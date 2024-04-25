@@ -1,6 +1,7 @@
 {{page-title "Pets"}}
 <button type="button" {{action "addPets"}}>Add Pet</button>
 {{#if (and (not-eq this.petsList.length undefined) (not-eq this.petsList.length "0"))}}
+<table>
 	<thead>
 		<tr>
 			<th>Pet Name</th>
@@ -9,15 +10,16 @@
 			<th>Edit</th>
 		</tr>
 	</thead>
-		<tbody>
-			{{#each this.petsList as |pet|}}
-				<tr>
-					<td>{{pet.pet_name}}</td>
-					<td>{{pet.pet_size}}</td>
-					<td>{{pet.pet_type}}</td>
-					<td>Edit</td>
-				</tr>
-			{{/each}}
-		</tbody>
+	<tbody>
+		{{#each this.petsList as |pet|}}
+			<tr>
+				<td>{{pet.pet_name}}</td>
+				<td>{{pet.pet_size}}</td>
+				<td>{{pet.pet_type}}</td>
+				<td>Edit</td>
+			</tr>
+		{{/each}}
+	</tbody>
+</table>
 {{/if}}
 {{outlet}}
