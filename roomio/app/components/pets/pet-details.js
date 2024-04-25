@@ -4,19 +4,19 @@ import { service } from '@ember/service';
 
 export default Component.extend({
   ajaxfw: service(),
-	router: service(),
+  router: service(),
   petName: '',
   petType: '',
   petSize: '',
   username: '',
 
   actions: {
-		petTypeChanged(event) {
-			this.set("petType", event.target.value)
-		},
-		petSizeChanged(event) {
-			this.set("petSize", event.target.value)
-		},
+    petTypeChanged(event) {
+      this.set('petType', event.target.value);
+    },
+    petSizeChanged(event) {
+      this.set('petSize', event.target.value);
+    },
     savePetDetails() {
       let data = {
         pet_name: this.petName,
