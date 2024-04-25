@@ -84,7 +84,7 @@ input[type="password"] {
   border-radius: 3px;
 }
 
-.signup-form select {
+select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ccc;

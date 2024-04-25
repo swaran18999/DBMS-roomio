@@ -4,27 +4,22 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 
 export default class UserPetsRoute extends Route {
+  @service router;
   @service ajaxfw;
+	model() {
+		this._super(...arguments);
+		this.ajaxfw.request('/get_pet').then((res) => {
+      this.controller.set("petsList", res['pets'])
+			console.log(res);
+		}, (err) => {
+			console.error(err);
+		})
+	}
   setupController(controller) {
     controller.set('currentRoute', this);
   }
   @action
-  savePetDetailsAPI(data) {
-    console.log('savePetDetailsAPI');
-    console.log(data);
-    this.ajaxfw
-      .post('/register_pet', {
-        data: data,
-      })
-      .then(
-        (res) => {
-          console.log(res);
-          console.log('Saved successfully');
-        },
-        (err) => {
-          console.log('err');
-          console.log(err);
-        }
-      );
+  addPets() {
+    this.router.transitionTo('user.addPets');
   }
 }

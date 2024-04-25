@@ -1,3 +1,23 @@
 {{page-title "Pets"}}
-{{pets/pet-details savePetDetailsAPI=(action "savePetDetailsAPI" target=this.currentRoute)}}
+<button type="button" {{action "addPets"}}>Add Pet</button>
+{{#if (and (not-eq this.petsList.length undefined) (not-eq this.petsList.length "0"))}}
+	<thead>
+		<tr>
+			<th>Pet Name</th>
+			<th>Pet Type</th>
+			<th>Pet Size</th>
+			<th>Edit</th>
+		</tr>
+	</thead>
+		<tbody>
+			{{#each this.petsList as |pet|}}
+				<tr>
+					<td>{{pet.pet_name}}</td>
+					<td>{{pet.pet_size}}</td>
+					<td>{{pet.pet_type}}</td>
+					<td>Edit</td>
+				</tr>
+			{{/each}}
+		</tbody>
+{{/if}}
 {{outlet}}

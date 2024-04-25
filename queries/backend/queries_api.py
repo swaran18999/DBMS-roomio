@@ -103,11 +103,10 @@ Feature 2. Register and Update Pet
 
 I've kept a put and a post for editing pet info, check which works and go about it
 '''
-@app.route('/get_pet', methods=['POST'])
+@app.route('/get_pet')
 def get_pet():
     try:
-        data = request.get_json()  # Get JSON data from the request body
-        username = data.get('username')  # Get the username from the JSON data
+        username = session['username']  # Get the username from the JSON data
 
         query = "SELECT * FROM Pets WHERE username = %s;"
         parameters = (username,)
