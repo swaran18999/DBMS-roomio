@@ -2,6 +2,14 @@
   fill: darkslategrey;
 }
 
+.icon-green {
+  fill: green
+}
+
+.icon-red {
+  fill: red
+}
+
 .icon-clickable {
   cursor: pointer;
 }

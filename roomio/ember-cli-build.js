@@ -6,8 +6,6 @@ module.exports = function (defaults) {
   const app = new EmberApp(defaults, {
     svgJar: {
       sourceDirs: [
-        'node_modules/material-design-icons/file/svg/design',
-        'node_modules/material-design-icons/action/svg/design',
         'public/icons',
       ],
     },
