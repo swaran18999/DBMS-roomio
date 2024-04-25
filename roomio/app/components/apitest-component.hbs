@@ -1,11 +1,11 @@
 <div>
 	<h2>Pet Details</h2>
 	<label>
-		Pet Name:
+		API:
 		<Input @type="text" @value={{this.apiName}} />
 	</label>
 		<div class="form-group">
-			<label for="gender">Pet Type:</label>
+			<label for="gender">API Type:</label>
 			<select class="form-control" {{on "change" (action "methodChanged")}}>
 				<option value="POST">POST</option>
 				<option value="GET">GET</option>

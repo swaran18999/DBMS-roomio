@@ -15,7 +15,7 @@ export default Component.extend({
 		sendAPI() {
 			this.ajaxfw
 				.request(this.apiName, {
-					data: JSON.parse(this.data),
+					data: this.data.trim() == "" ? "" : JSON.parse(this.data),
 					method: this.method
 				})
 				.then(
