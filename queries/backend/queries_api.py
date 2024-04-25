@@ -108,7 +108,7 @@ def get_pet():
     try:
         username = session['username']  # Get the username from the JSON data
 
-        query = "SELECT * FROM Pets WHERE username = %s;"
+        query = "SELECT * FROM Pets AS p WHERE username = %s ORDER BY p.petname;"
         parameters = (username,)
 
         pets = fetchQueryResult(query, parameters)
@@ -152,12 +152,16 @@ def register_pet():
 
 @app.route('/update_pet', methods=['POST'])
 def update_pet():
+    data_dict = {}
+    for key, value in request.form.items():
+        data_dict = json.loads(key)
+
     try:
-        username = request.form['username']
-        pet_name = request.form['pet_name']
-        pet_type = request.form['pet_type']
-        new_pet_size = request.form['new_pet_size']
-        new_pet_type = request.form['new_pet_type']
+        username = session['username']
+        pet_name = data_dict['old_pet_name']
+        pet_type = data_dict['old_pet_type']
+        new_pet_size = data_dict['pet_size']
+        new_pet_type = data_dict['pet_type']
 
         query = "UPDATE Pets SET PetSize = %s, PetType = %s WHERE username = %s AND PetName = %s AND PetType = %s;"
         parameters = (new_pet_size, new_pet_type, username, pet_name, pet_type)

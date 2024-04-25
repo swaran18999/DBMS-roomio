@@ -5,8 +5,8 @@
 	<thead>
 		<tr>
 			<th>Pet Name</th>
-			<th>Pet Type</th>
 			<th>Pet Size</th>
+			<th>Pet Type</th>
 			<th>Edit</th>
 		</tr>
 	</thead>
@@ -14,9 +14,80 @@
 		{{#each this.petsList as |pet|}}
 			<tr>
 				<td>{{pet.pet_name}}</td>
-				<td>{{pet.pet_size}}</td>
-				<td>{{pet.pet_type}}</td>
-				<td>{{svg-jar "edit" class="icon-grey icon-clickable"}}</td>
+				<td>
+					{{#if (eq pet.is_editable true)}}
+						<div class="form-group" style="margin-bottom: 0px">
+							<select class="form-control" {{on "change" (action "petSizeChanged" pet target=this.currentRoute)}}>
+								{{#if (eq pet.pet_size "Small")}}
+									<option value="Small" selected>Small</option>
+								{{else}}
+									<option value="Small">Small</option>
+								{{/if}}
+								{{#if (eq pet.pet_size "Medium")}}
+									<option value="Medium" selected>Medium</option>
+								{{else}}
+									<option value="Medium">Medium</option>
+								{{/if}}
+								{{#if (eq pet.pet_size "Large")}}
+									<option value="Large" selected>Large</option>
+								{{else}}
+									<option value="Large">Large</option>
+								{{/if}}
+							</select>
+						</div>
+					{{else}}
+						{{pet.pet_size}}
+					{{/if}}
+				</td>
+				<td>
+					{{#if (eq pet.is_editable true)}}
+						<div class="form-group" style="margin-bottom: 0px">
+							<select class="form-control" {{on "change" (action "petTypeChanged" pet target=this.currentRoute)}}>
+								{{#if (eq pet.pet_type "Dog")}}
+									<option value="Dog" selected>Dog</option>
+								{{else}}
+									<option value="Dog">Dog</option>
+								{{/if}}
+								{{#if (eq pet.pet_type "Cat")}}
+									<option value="Cat" selected>Cat</option>
+								{{else}}
+									<option value="Cat">Cat</option>
+								{{/if}}
+								{{#if (eq pet.pet_type "Rodent")}}
+									<option value="Rodent" selected>Rodent</option>
+								{{else}}
+									<option value="Rodent">Rodent</option>
+								{{/if}}
+								{{#if (eq pet.pet_type "Turtle")}}
+									<option value="Turtle" selected>Turtle</option>
+								{{else}}
+									<option value="Turtle">Dog</option>
+								{{/if}}
+								{{#if (eq pet.pet_type "Bird")}}
+									<option value="Bird" selected>Bird</option>
+								{{else}}
+									<option value="Bird">Bird</option>
+								{{/if}}
+							</select>
+						</div>
+					{{else}}
+						{{pet.pet_type}}
+					{{/if}}
+				</td>
+				<td>
+					{{#if (eq pet.is_editable true)}}
+						<span {{on "click" (action "savePets" pet target=this.currentRoute)}}>
+							{{svg-jar "done" class="icon-green icon-clickable"}}
+						</span>
+						<span {{on "click" (action "cancelEdit" pet target=this.currentRoute)}}>
+							{{svg-jar "close" class="icon-red icon-clickable"}}
+						</span>
+					{{else}}
+						<span {{on "click" (action "editPets" pet target=this.currentRoute)}}>
+							{{svg-jar "edit" class="icon-grey icon-clickable"}}
+						</span>
+					{{/if}}
+				</td>
 			</tr>
 		{{/each}}
 	</tbody>
