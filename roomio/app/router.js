@@ -12,7 +12,6 @@ Router.map(function () {
   this.route('user', function () {
     this.route('pets');
     this.route('addPets');
-    this.route('edit-pets');
   });
   this.route('search');
   this.route('login');
