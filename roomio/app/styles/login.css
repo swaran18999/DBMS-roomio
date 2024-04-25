@@ -73,6 +73,7 @@ input[type="password"] {
   margin-bottom: 5px;
 }
 
+textarea,
 .signup-form input[type="text"],
 .signup-form input[type="email"],
 .signup-form input[type="tel"],
