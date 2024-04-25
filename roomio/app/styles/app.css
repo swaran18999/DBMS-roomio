@@ -1,6 +1,7 @@
 @import url("./nav-bar.css");
 @import url("./login.css");
 @import url("./table.css");
+@import url("./icons.css");
 
 .ember-application {
   margin: 0;
