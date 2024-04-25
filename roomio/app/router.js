@@ -16,4 +16,5 @@ Router.map(function () {
   this.route('search');
   this.route('login');
   this.route('signup');
+  this.route('api-test');
 });
