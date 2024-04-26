@@ -45,6 +45,7 @@
         <label for="password">Confirm Password:</label>
         <Input id="confirm-password" @type="password" @value={{this.confirmPassword}} class="form-control" required/>
       </div>
+      <p>Already have an account? <a {{action "goToLogin" on="click"}}>Login</a>.</p>
       <button type="submit" class="btn btn-primary">Sign Up</button>
     </form>
     {{#if this.signupSuccess}}
