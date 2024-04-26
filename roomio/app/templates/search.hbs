@@ -1,9 +1,11 @@
-<input
-	type="text"
+<Input
+	@type="text"
 	placeholder="Search..."
 	{{on "input" (action "handleSearchInput" target=this.currentRoute)}}
+	style="margin-bottom: 20px;"
 />
-{{#if (eq this.hasData true)}}
+<table>
+{{#if (eq this.hasUnitData true)}}
 	<thead>
 	<tr>
 		<th>Company Name</th>
@@ -21,7 +23,7 @@
 		<th>Amenity Description</th>
 	</tr>
 	</thead>
-		<tbody>
+	<tbody>
 	{{#each this.searchOutputUnits as |rental|}}
 		<tr>
 			<td>{{rental.CompanyName}}</td>
@@ -40,6 +42,22 @@
 			<td>{{rental.AmenityDescription}}</td>
 		</tr>
 	{{/each}}
+	</tbody>
+{{/if}}
+{{#if (eq this.hasBuildingData true)}}
+	<thead>
+	<tr>
+		<th>Company Name</th>
+		<th>Building Name</th>
+		<th>Address</th>
+		<th>City</th>
+		<th>State</th>
+		<th>Zip Code</th>
+		<th>Number of Units Available</th>
+		<th>Year Built</th>
+	</tr>
+	</thead>
+		<tbody>
 	{{#each this.searchOutputBuild as |rental|}}
 		<tr>
 			<td>{{rental.CompanyName}}</td>
@@ -48,17 +66,11 @@
 			<td>{{rental.AddrCity}}</td>
 			<td>{{rental.AddrState}}</td>
 			<td>{{rental.AddrZipCode}}</td>
-			<td>{{rental.unitNumber}}</td>
-			<td>{{rental.MonthlyRent}}</td>
-			<td>{{rental.squareFootage}}</td>
+			<td>{{rental.NumberOfAvailableUnits}}</td>
 			<td>{{rental.YearBuilt}}</td>
-			{{!-- <td>{{format-date rental.AvailableDateForMoveIn "dddd, MMMM Do YYYY"}}</td> --}}
-			<td>{{rental.AvailableDateForMoveIn}}</td>
-			<td>{{rental.AmenityType}}</td>
-			<td>{{rental.AmenityDescription}}</td>
 		</tr>
 	{{/each}}
 	</tbody>
-{{else}}
 {{/if}}
+</table>
 {{outlet}}

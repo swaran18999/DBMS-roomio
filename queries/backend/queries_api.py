@@ -3,6 +3,7 @@ from flask import Flask , render_template, request, redirect, url_for, jsonify
 import psycopg2, hashlib, os
 from flask_cors import CORS
 import json
+from urllib.parse import unquote
 
 session = {}
 
@@ -205,6 +206,7 @@ Search by Unit
 @app.route('/search_building/<building_name>', methods=['GET'])
 def search_building(building_name):
     try:
+        building_name = unquote(building_name)
         query = """
             SELECT AB.CompanyName, AB.BuildingName, AB.AddrNum, AB.AddrStreet, AB.AddrCity, AB.AddrState, AB.AddrZipCode, AB.YearBuilt, 
                    AvailableUnits.NumberOfAvailableUnits, A.aType AS AmenityType, A.Description AS AmenityDescription
@@ -251,6 +253,7 @@ def search_building(building_name):
 @app.route('/search_unit/<unit_number>', methods=['GET'])
 def search_unit(unit_number):
     try:
+        unit_number = unquote(unit_number)
         query = """
             SELECT AB.CompanyName, AB.BuildingName, AB.AddrNum, AB.AddrStreet, AB.AddrCity, AB.AddrState, AB.AddrZipCode, AB.YearBuilt,
                    AU.UnitRentID, AU.unitNumber, AU.MonthlyRent, AU.squareFootage, AU.AvailableDateForMoveIn,

@@ -14,7 +14,8 @@ export default class SearchRoute extends Route {
   handleSearchInput(event) {
     this.controller.set('searchOutputUnits', []);
     this.controller.set('searchOutputBuild', []);
-    this.controller.set('hasData', false);
+    this.controller.set('hasUnitData', false);
+    this.controller.set('hasBuildingData', false);
     let searchInput = event.target.value;
     // console.log('Search input:', searchInput);
     let self = this;
@@ -22,7 +23,7 @@ export default class SearchRoute extends Route {
       (res) => {
         console.log(res);
         self.controller.set('searchOutputUnits', res.data);
-        self.controller.set('hasData', true);
+        self.controller.set('hasUnitData', true);
       },
       (err) => {
         console.log('err');
@@ -33,7 +34,7 @@ export default class SearchRoute extends Route {
       (res) => {
         console.log(res);
         self.controller.set('searchOutputBuild', res.data);
-        self.controller.set('hasData', true);
+        self.controller.set('hasBuildingData', true);
       },
       (err) => {
         console.log('err');
