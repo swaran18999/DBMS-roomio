@@ -2,6 +2,7 @@
 @import url("./login.css");
 @import url("./table.css");
 @import url("./icons.css");
+@import url("./search.css");
 
 .ember-application {
   margin: 0;
@@ -16,6 +17,11 @@
 a {
   color: blue;
   cursor: pointer;
+}
+
+.none-found {
+  color: red;
+  margin: 10px 0px;
 }
 
 button {

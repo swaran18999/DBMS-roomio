@@ -226,6 +226,43 @@ def delete_pet():
 #         print(f"Error updating pet: {e}")
 #         return jsonify({'flag': 0, 'message': 'An error occurred while updating the pet'}), 500
 
+@app.route('/search_apartment', methods=['POST'])
+def search_apartment():
+    try:
+        data_dict = request.get_json()
+        company_name = data_dict.get('companyName')
+        building_name = data_dict.get('buildingName')
+        
+        if not company_name or not building_name:
+            return jsonify({'flag': 0, 'message': 'Company name and building name are required'}), 400
+
+        query = """
+            SELECT UnitRentID, CompanyName, BuildingName, UnitNumber, MonthlyRent, SquareFootage, AvailableDateForMoveIn
+            FROM ApartmentUnit
+            WHERE CompanyName = %s AND BuildingName = %s;
+        """
+        parameters = (company_name, building_name)
+
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = []
+            for row in result:
+                data.append({
+                    'UnitRentID': row[0],
+                    'CompanyName': row[1],
+                    'BuildingName': row[2],
+                    'UnitNumber': row[3],
+                    'MonthlyRent': row[4],
+                    'SquareFootage': row[5],
+                    'AvailableDateForMoveIn': row[6].isoformat()  # Convert date to ISO format
+                })
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'data': [], 'message': 'No apartments found for the given company and building'}), 200
+    except Exception as e:
+        print(f"Error searching apartments: {e}")
+        return jsonify({'flag': 0, 'message': 'An error occurred while searching apartments'}), 500
 
 ''' 
 5. Search by building 

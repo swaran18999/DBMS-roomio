@@ -1,1 +1,39 @@
-{{yield}}
+<div>
+	<h2>Search Unit</h2>
+	<div class="search-apartment">
+    <form {{action "searchApartments" on="submit"}}>
+			<Input @type="text" @value={{this.companyName}} placeholder="Enter company name" required />
+			<Input @type="text" @value={{this.buildingName}} placeholder="Enter building name" required />
+			<button type="submit">Search</button>
+    </form>
+	</div>
+</div>
+<table>
+{{#if (eq this.searchOutputUnits.length 0)}}
+<div class="none-found">No Units Found!!</div>
+{{/if}}
+{{#if (and (not-eq this.searchOutputUnits.length undefined) (not-eq this.searchOutputUnits.length 0))}}
+	<thead>
+	<tr>
+		<th>Company Name</th>
+		<th>Building Name</th>
+		<th>Unit Number</th>
+		<th>Monthly Rent</th>
+		<th>Square Footage</th>
+		<th>Available Date</th>
+	</tr>
+	</thead>
+	<tbody>
+	{{#each this.searchOutputUnits as |rental|}}
+		<tr>
+			<td>{{rental.CompanyName}}</td>
+			<td>{{rental.BuildingName}}</td>
+			<td>{{rental.UnitNumber}}</td>
+			<td>{{rental.MonthlyRent}}</td>
+			<td>{{rental.SquareFootage}}</td>
+			<td>{{rental.AvailableDateForMoveIn}}</td>
+		</tr>
+	{{/each}}
+	</tbody>
+{{/if}}
+</table>
