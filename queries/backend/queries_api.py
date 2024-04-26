@@ -198,7 +198,6 @@ def update_pet():
 #         return jsonify({'flag': 0, 'message': 'An error occurred while updating the pet'}), 500
 
 
-
 ''' 
 5. Search by building 
 Search by Unit
@@ -293,6 +292,173 @@ def search_unit(unit_number):
         print(f"Error searching unit: {e}")
         return jsonify({'flag': 0, 'message': 'An error occurred while searching the unit'}), 500
 
+# 2
+@app.route('/search_units_by_pet_policy', methods=['GET'])
+def search_units_by_pet_policy():
+    try:
+        # Retrieving parameters from query string
+        print(session)
+        username = session['username']
+        company_name = request.args.get('company_name')
+        building_name = request.args.get('building_name')
+
+        # Ensuring all required parameters are provided
+        if not all([username, company_name, building_name]):
+            return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
+
+        query = """ 
+        SELECT 
+            DISTINCT(au.UnitRentID), 
+            au.unitNumber, 
+            au.MonthlyRent, 
+            au.squareFootage, 
+            au.AvailableDateForMoveIn
+        FROM 
+            ApartmentUnit au
+            INNER JOIN PetPolicy pp ON au.CompanyName = pp.CompanyName AND au.BuildingName = pp.BuildingName
+            LEFT JOIN Pets p ON pp.PetType = p.PetType AND pp.PetSize = p.PetSize AND p.username = %s
+        WHERE 
+            au.BuildingName = %s AND
+            au.CompanyName = %s AND
+            (pp.isAllowed = TRUE OR p.PetName IS NULL)
+        GROUP BY 
+            au.UnitRentID, 
+            au.unitNumber, 
+            au.MonthlyRent, 
+            au.squareFootage, 
+            au.AvailableDateForMoveIn
+        HAVING 
+            COUNT(DISTINCT CONCAT(p.PetType, '-', p.PetSize)) = 
+            (SELECT COUNT(DISTINCT CONCAT(up.PetType, '-', up.PetSize)) FROM Pets up WHERE username = %s)
+            OR NOT EXISTS (SELECT 1 FROM Pets WHERE username = %s);
+        """
+
+        parameters = (username, building_name, company_name, username, username)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'UnitRentID': row[0],
+                'unitNumber': row[1],
+                'MonthlyRent': row[2],
+                'squareFootage': row[3],
+                'AvailableDateForMoveIn': row[4]
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No units found matching criteria'}), 404
+    except Exception as e:
+        print(f"Error searching units by pet policy: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred while searching the units: {e}'}), 500
+
+
+# 8
+@app.route('/search_interests', methods=['GET'])
+def search_interests():
+    # Retrieve query parameters
+    move_in_date = request.args.get('MoveInDate')
+    unit_rent_id = request.args.get('UnitRentID')
+    roommate_cnt = request.args.get('RoommateCnt')
+
+    # Validate required parameters
+    if not all([move_in_date, unit_rent_id, roommate_cnt]):
+        return jsonify({'flag': 0, 'message': 'Missing required query parameters'}), 400
+
+    try:
+        query = """
+        SELECT i.UnitRentID, i.RoommateCnt, i.MoveInDate, u.first_name, u.last_name, u.gender, u.Phone, u.email
+        FROM Interests i
+        NATURAL JOIN Users u
+        WHERE i.MoveInDate = %s AND i.UnitRentID = %s AND i.RoommateCnt = %s;
+        """
+        parameters = (move_in_date, unit_rent_id, roommate_cnt)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'UnitRentID': row[0],
+                'RoommateCount': row[1],
+                'MoveInDate': row[2],
+                'FirstName': row[3],
+                'LastName': row[4],
+                'Gender': row[5],
+                'Phone': row[6],
+                'Email': row[7]
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No interests found matching criteria'}), 404
+    except Exception as e:
+        print(f"Error in fetching interests: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+# 9
+@app.route('/average_rent_by_zipcode', methods=['GET'])
+def average_rent_by_xbxb():
+    # Retrieve the zip code from query parameters
+    zip_code = request.args.get('zip_code')
+    if not zip_code:
+        return jsonify({'flag': 0, 'message': 'Zip code parameter is required'}), 400
+
+    try:
+        query = """
+        SELECT au.XbXb, AVG(au.MonthlyRent) AS AverageMonthlyRent
+        FROM AuExtra au 
+        NATURAL JOIN ApartmentBuilding ab
+        WHERE ab.AddrZipCode = %s
+        GROUP BY au.XbXb;
+        """
+        parameters = (zip_code,)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{'XbXb': row[0], 'AverageMonthlyRent': float(row[1])} for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No data found for the specified zip code'}), 404
+    except Exception as e:
+        print(f"Error in fetching average rent by XbXb: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+# 11
+@app.route('/rent_extra_view', methods=['GET'])
+def rent_extra_view():
+    # Retrieve the UnitRentID from query parameters
+    print(request.args)
+    unit_rent_id = request.args.get('UnitRentID')
+    if not unit_rent_id:
+        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
+
+    try:
+        query = """
+        SELECT au.UnitRentID, au.MonthlyRent, (
+            SELECT AVG(au2.MonthlyRent)
+            FROM auextra au2
+            NATURAL JOIN ApartmentBuilding ab2
+            WHERE ABS(au.squareFootage - au2.squareFootage) <= 0.10 * au.squareFootage
+            AND ab2.AddrCity = ab.AddrCity AND au2.UnitRentID != au.UnitRentID) AS Extra_View
+        FROM
+        auextra au 
+        NATURAL JOIN ApartmentBuilding ab
+        WHERE au.UnitRentID = %s;
+        """
+        parameters = (unit_rent_id,)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'UnitRentID': row[0],
+                'MonthlyRent': float(row[1]),
+                'ExtraView': float(row[2]) if row[2] is not None else None
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            print("Result was empty")
+            return jsonify({'flag': 0, 'message': 'No data found for the specified UnitRentID'}), 404
+    except Exception as e:
+        print(f"Error in fetching rent extra view: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
 
 
 def fetchQueryResult(query, parameters):
@@ -303,13 +469,15 @@ def fetchQueryResult(query, parameters):
         host="batyr.db.elephantsql.com",
         port= '5432'
     )
+    try:
+        cur_object = con.cursor()
 
-    cur_object = con.cursor()
+        cur_object.execute(query, parameters)
 
-    cur_object.execute(query, parameters)
-
-    result = cur_object.fetchall()
-
+        result = cur_object.fetchall()
+    except Exception as e:
+        print(f"Error occured while processing query {query} \n Error: {e}")
+        result = None
     return result
 
 def executeQueryResult(query, parameters):
@@ -320,14 +488,17 @@ def executeQueryResult(query, parameters):
         host="batyr.db.elephantsql.com",
         port= '5432'
     )
+    try:
+        cur_object = con.cursor()
 
-    cur_object = con.cursor()
+        cur_object.execute(query, parameters)
 
-    cur_object.execute(query, parameters)
+        con.commit()
 
-    con.commit()
-
-    return True
+        return True
+    except Exception as e:
+        print("Post failed due to",e)
+        return False
 
 @app.route('/trial')
 def trialAPI():
