@@ -26,8 +26,8 @@ export default class SearchRoute extends Route {
         self.controller.set('hasUnitData', true);
       },
       (err) => {
-        if(err.status == 401) {
-          this.router.transitionTo("login");
+        if (err.status == 401) {
+          this.router.transitionTo('login');
         }
         console.log('err');
         console.log(err);
@@ -40,8 +40,8 @@ export default class SearchRoute extends Route {
         self.controller.set('hasBuildingData', true);
       },
       (err) => {
-        if(err.status == 401) {
-          this.router.transitionTo("login");
+        if (err.status == 401) {
+          this.router.transitionTo('login');
         }
         console.log('err');
         console.log(err);

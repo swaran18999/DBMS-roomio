@@ -6,8 +6,8 @@ export default Route.extend({
   router: service(),
   afterModel() {
     this._super(...arguments);
-    if(this._router.url == "/") {
-        this.router.transitionTo('login');
+    if (this._router.url == '/') {
+      this.router.transitionTo('login');
     }
   },
 });

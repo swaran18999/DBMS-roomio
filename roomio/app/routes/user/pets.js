@@ -13,8 +13,8 @@ export default class UserPetsRoute extends Route {
   fetchPets() {
     this.ajaxfw.request('/get_pet').then(
       (res) => {
-        let pets = res['pets']
-        pets.forEach(pet => {
+        let pets = res['pets'];
+        pets.forEach((pet) => {
           pet['is_editable'] = false;
           pet['is_delete'] = false;
           pet['old_pet_name'] = pet['pet_name'];
@@ -25,8 +25,8 @@ export default class UserPetsRoute extends Route {
       },
       (err) => {
         console.error(err);
-        if(err.status == 401) {
-          this.router.transitionTo("login");
+        if (err.status == 401) {
+          this.router.transitionTo('login');
         }
       }
     );
@@ -38,50 +38,54 @@ export default class UserPetsRoute extends Route {
     this.router.transitionTo('user.addPets');
   }
   @action editPets(pet) {
-    set(pet, "is_editable", true)
+    set(pet, 'is_editable', true);
   }
   @action deletePets(pet) {
-    set(pet, "is_delete", true)
+    set(pet, 'is_delete', true);
   }
   @action confirmDeletePets(pet) {
-    this.ajaxfw.request('/delete_pet', {
-      method: "POST",
-      data: pet
-    }).then(
-      (res) => {
-        console.log(res);
-        this.fetchPets();
-      },
-      (err) => {
-        if(err.status == 401) {
-          this.router.transitionTo("login");
+    this.ajaxfw
+      .request('/delete_pet', {
+        method: 'POST',
+        data: pet,
+      })
+      .then(
+        (res) => {
+          console.log(res);
+          this.fetchPets();
+        },
+        (err) => {
+          if (err.status == 401) {
+            this.router.transitionTo('login');
+          }
+          console.error(err);
         }
-        console.error(err);
-      }
-    );
+      );
   }
   @action petTypeChanged(pet, e) {
-    set(pet, "pet_type", e.target.value);
+    set(pet, 'pet_type', e.target.value);
   }
   @action petSizeChanged(pet, e) {
-    set(pet, "pet_size", e.target.value);
-  }  
+    set(pet, 'pet_size', e.target.value);
+  }
   @action savePets(pet, e) {
-    this.ajaxfw.request('/update_pet', {
-      method: "POST",
-      data: pet
-    }).then(
-      (res) => {
-        console.log(res);
-        this.fetchPets();
-      },
-      (err) => {
-        if(err.status == 401) {
-          this.router.transitionTo("login");
+    this.ajaxfw
+      .request('/update_pet', {
+        method: 'POST',
+        data: pet,
+      })
+      .then(
+        (res) => {
+          console.log(res);
+          this.fetchPets();
+        },
+        (err) => {
+          if (err.status == 401) {
+            this.router.transitionTo('login');
+          }
+          console.error(err);
         }
-        console.error(err);
-      }
-    );
+      );
   }
   @action cancelEdit(pet, e) {
     this.fetchPets();
