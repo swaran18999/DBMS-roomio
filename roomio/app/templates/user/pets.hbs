@@ -1,5 +1,6 @@
 {{page-title "Pets"}}
 <button type="button" {{action "addPets"}}>Add Pet</button>
+<div style="margin: 20px;"></div>
 {{#if (and (not-eq this.petsList.length undefined) (not-eq this.petsList.length "0"))}}
 <table>
 	<thead>
