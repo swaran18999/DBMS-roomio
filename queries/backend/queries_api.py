@@ -4,6 +4,7 @@ import psycopg2, hashlib, os
 from flask_cors import CORS
 import json
 from urllib.parse import unquote
+from functools import wraps
 
 session = {}
 
@@ -15,6 +16,14 @@ def getEncryptedPassword(password):
     salt = "random_salt"
     hash_password = hashlib.sha256((password + salt).encode()).hexdigest()
     return hash_password
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            return jsonify({'flag': 2, 'message': 'User not authenticated'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 def index():
@@ -101,6 +110,7 @@ Feature 2. Register and Update Pet
 I've kept a put and a post for editing pet info, check which works and go about it
 '''
 @app.route('/get_pet')
+@login_required
 def get_pet():
     try:
         username = session['username']  # Get the username from the JSON data
@@ -122,6 +132,7 @@ def get_pet():
 
 
 @app.route('/register_pet', methods=['POST'])
+@login_required
 def register_pet():
     data_dict = request.get_json()
 
@@ -146,6 +157,7 @@ def register_pet():
 
 
 @app.route('/update_pet', methods=['POST'])
+@login_required
 def update_pet():
     data_dict = request.get_json()
 
@@ -170,6 +182,7 @@ def update_pet():
         return jsonify({'flag': 0, 'message': 'An error occurred while updating the pet'}), 500
 
 @app.route('/delete_pet', methods=['POST'])
+@login_required
 def delete_pet():
     try:
         username = session['username']
@@ -312,6 +325,7 @@ def search_unit(unit_number):
 
 # 2
 @app.route('/search_units_by_pet_policy', methods=['GET'])
+@login_required
 def search_units_by_pet_policy():
     try:
         # Retrieving parameters from query string

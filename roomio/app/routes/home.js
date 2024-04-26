@@ -15,6 +15,9 @@ export default Route.extend({
           console.log(res);
         },
         (err) => {
+          if(err.status == 401) {
+            this.router.transitionTo("login");
+          }
           console.log('err');
           console.log(err);
         }

@@ -25,6 +25,9 @@ export default class UserPetsRoute extends Route {
       },
       (err) => {
         console.error(err);
+        if(err.status == 401) {
+          this.router.transitionTo("login");
+        }
       }
     );
   }
@@ -50,6 +53,9 @@ export default class UserPetsRoute extends Route {
         this.fetchPets();
       },
       (err) => {
+        if(err.status == 401) {
+          this.router.transitionTo("login");
+        }
         console.error(err);
       }
     );
@@ -70,6 +76,9 @@ export default class UserPetsRoute extends Route {
         this.fetchPets();
       },
       (err) => {
+        if(err.status == 401) {
+          this.router.transitionTo("login");
+        }
         console.error(err);
       }
     );
