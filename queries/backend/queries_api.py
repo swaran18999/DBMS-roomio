@@ -30,9 +30,7 @@ def index():
 
 @app.route('/signup' , methods = ['POST'])
 def signup():
-    data_dict = {}
-    for key, value in request.form.items():
-        data_dict = json.loads(key)
+    data_dict = request.get_json()
     
     userName = data_dict['newUsername']
     password = data_dict['newPassword']
@@ -63,9 +61,7 @@ def signup():
 
 @app.route('/login' , methods = ['POST'])
 def login():
-    data_dict = {}
-    for key, value in request.form.items():
-        data_dict = json.loads(key)
+    data_dict = request.get_json()
     username = data_dict['username']
     password = data_dict['password']   
 
@@ -127,9 +123,7 @@ def get_pet():
 
 @app.route('/register_pet', methods=['POST'])
 def register_pet():
-    data_dict = {}
-    for key, value in request.form.items():
-        data_dict = json.loads(key)
+    data_dict = request.get_json()
 
     try:
         pet_name = data_dict['pet_name']
@@ -153,9 +147,7 @@ def register_pet():
 
 @app.route('/update_pet', methods=['POST'])
 def update_pet():
-    data_dict = {}
-    for key, value in request.form.items():
-        data_dict = json.loads(key)
+    data_dict = request.get_json()
 
     try:
         username = session['username']
