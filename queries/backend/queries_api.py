@@ -20,7 +20,7 @@ def getEncryptedPassword(password):
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:
+        if 'username' not in session or session['username'] == None:
             return jsonify({'flag': 2, 'message': 'User not authenticated'}), 401
         return f(*args, **kwargs)
     return decorated_function
