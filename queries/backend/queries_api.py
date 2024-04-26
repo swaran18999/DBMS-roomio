@@ -169,7 +169,30 @@ def update_pet():
         print(f"Error updating pet: {e}")
         return jsonify({'flag': 0, 'message': 'An error occurred while updating the pet'}), 500
 
+@app.route('/delete_pet', methods=['POST'])
+def delete_pet():
+    try:
+        username = session['username']
+        data_dict = request.get_json()
 
+        pet_name = data_dict.get('pet_name')
+        pet_type = data_dict.get('pet_type')
+
+        if not pet_name or not pet_type:
+            return jsonify({'flag': 0, 'message': 'Pet name and type are required'}), 400
+
+        query = "DELETE FROM Pets WHERE username = %s AND PetName = %s AND PetType = %s;"
+        parameters = (username, pet_name, pet_type)
+
+        result = executeQueryResult(query, parameters)
+
+        if result:
+            return jsonify({'flag': 1, 'message': 'Pet deleted successfully'}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'Failed to delete pet'}), 400
+    except Exception as e:
+        print(f"Error deleting pet: {e}")
+        return jsonify({'flag': 0, 'message': 'An error occurred while deleting the pet'}), 500
 
 # @app.route('/update_pet/<username>/<pet_name>/<pet_type>', methods=['PUT'])
 # def update_pet(username, pet_name, pet_type):

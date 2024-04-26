@@ -16,6 +16,7 @@ export default class UserPetsRoute extends Route {
         let pets = res['pets']
         pets.forEach(pet => {
           pet['is_editable'] = false;
+          pet['is_delete'] = false;
           pet['old_pet_name'] = pet['pet_name'];
           pet['old_pet_type'] = pet['pet_type'];
         });
@@ -35,6 +36,23 @@ export default class UserPetsRoute extends Route {
   }
   @action editPets(pet) {
     set(pet, "is_editable", true)
+  }
+  @action deletePets(pet) {
+    set(pet, "is_delete", true)
+  }
+  @action confirmDeletePets(pet) {
+    this.ajaxfw.request('/delete_pet', {
+      method: "POST",
+      data: pet
+    }).then(
+      (res) => {
+        console.log(res);
+        this.fetchPets();
+      },
+      (err) => {
+        console.error(err);
+      }
+    );
   }
   @action petTypeChanged(pet, e) {
     set(pet, "pet_type", e.target.value);

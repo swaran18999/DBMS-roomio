@@ -10,6 +10,14 @@
   fill: red
 }
 
+.icon-crimson {
+  fill: crimson
+}
+
+.icon-orange {
+  fill: orange
+}
+
 .icon-clickable {
   cursor: pointer;
 }

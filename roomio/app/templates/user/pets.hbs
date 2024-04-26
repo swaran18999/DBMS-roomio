@@ -7,7 +7,8 @@
 			<th>Pet Name</th>
 			<th>Pet Size</th>
 			<th>Pet Type</th>
-			<th>Edit</th>
+			<th></th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -85,6 +86,20 @@
 					{{else}}
 						<span {{on "click" (action "editPets" pet target=this.currentRoute)}}>
 							{{svg-jar "edit" class="icon-grey icon-clickable"}}
+						</span>
+					{{/if}}
+				</td>
+				<td>
+					{{#if (eq pet.is_delete true)}}
+						<span {{on "click" (action "confirmDeletePets" pet target=this.currentRoute)}}>
+							{{svg-jar "delete_forever" class="icon-red icon-clickable"}}
+						</span>
+						<span {{on "click" (action "cancelEdit" pet target=this.currentRoute)}}>
+							{{svg-jar "undo" class="icon-green icon-clickable"}}
+						</span>
+					{{else}}
+						<span {{on "click" (action "deletePets" pet target=this.currentRoute)}}>
+							{{svg-jar "delete" class="icon-crimson icon-clickable"}}
 						</span>
 					{{/if}}
 				</td>
