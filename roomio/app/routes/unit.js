@@ -16,6 +16,7 @@ export default Route.extend({
           data.AvailableDateForMoveIn
         );
         this.controller.set("unitID", unitID);
+        this.controller.set("isFav", false);
         this.controller.set('CompanyName',data.CompanyName);
         this.controller.set('BuildingName',data.BuildingName);
         this.controller.set('MonthlyRent', data.MonthlyRent);
@@ -33,6 +34,7 @@ export default Route.extend({
     );
     this.getInterests(unitID);
     this.getComments(unitID);
+    this.isInterested(unitID);
   },
   setupController(controller) {
     controller.set('currentRoute', this);
@@ -67,7 +69,56 @@ export default Route.extend({
       }
     )
   },
+  isInterested(unitID) {
+    this.ajaxfw.request('/is_favourite/' + unitID).then(
+      (res) => {
+        console.log(res)
+        this.controller.set("isFav", res.isFav)
+      },
+      (err) => {
+        this.controller.set("isFav", false)
+        if (err.status == 401) {
+          this.router.transitionTo('login');
+        }
+        console.error(err);
+      }
+    )
+  },
   actions: {
+    deleteFavourite() {
+      let unitID = this.controller.get("unitID");
+      this.ajaxfw.request('/remove_as_favourite/' + unitID).then(
+        (res) => {
+          console.log(res)
+          this.isInterested(unitID);
+        },
+        (err) => {
+          if (err.status == 401) {
+            this.router.transitionTo('login');
+          }
+          console.log(err);
+        }
+      );
+    },
+    markAsFavourite() {
+      let unitID = this.controller.get("unitID");
+      console.log(unitID)
+      let data = {
+        "UnitRentID": unitID, 
+      }
+      this.ajaxfw.post('/add_as_favourite', { data: data }).then(
+        (res) => {
+          console.log(res)
+          this.isInterested(unitID);
+        },
+        (err) => {
+          if (err.status == 401) {
+            this.router.transitionTo('login');
+          }
+          console.log(err);
+        }
+      );
+    },
     confirmRatingDelete(rating) {
       let unitID = this.controller.get("unitID");
       this.ajaxfw
@@ -138,6 +189,9 @@ export default Route.extend({
           this.getInterests(unitID);
         },
         (err) => {
+          if (err.status == 401) {
+            this.router.transitionTo('login');
+          }
           console.log(err);
         }
       );
@@ -163,6 +217,9 @@ export default Route.extend({
           this.getComments(unitID);
         },
         (err) => {
+          if (err.status == 401) {
+            this.router.transitionTo('login');
+          }
           console.log(err);
         }
       );

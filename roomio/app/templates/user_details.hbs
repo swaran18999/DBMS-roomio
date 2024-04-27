@@ -1,0 +1,60 @@
+{{page-title "User"}}
+<h2>User Details</h2>
+<table>
+	<tr>
+		<td>Username</td>
+		<td>{{this.UserName}}</td>
+	</tr>
+	<tr>
+		<td>First Name</td>
+		<td>{{this.FirstName}}</td>
+	</tr>
+	<tr>
+		<td>Last Name</td>
+		<td>{{this.LastName}}</td>
+	</tr>
+    <tr>
+		<td>Date of Birth</td>
+		<td>{{this.DOB}}</td>
+	</tr>
+    <tr>
+		<td>Gender</td>
+		<td>{{this.Gender}}</td>
+	</tr>
+    <tr>
+		<td>Email</td>
+		<td>{{this.Email}}</td>
+	</tr>
+	<tr>
+		<td>Phone</td>
+		<td>{{this.Phone}}</td>
+	</tr>
+</table>
+{{#if (and (not-eq this.favourites.length undefined) (not-eq this.favourites.length 0))}}
+<h2>Favorites</h2>
+<table>
+	<thead>
+	<tr>
+		<th>Company Name</th>
+		<th>Building Name</th>
+		<th>Unit Number</th>
+		<th></th>
+	</tr>
+	</thead>
+	<tbody>
+	{{#each this.favourites as |unit|}}
+		<tr>
+			<td>{{unit.CompanyName}}</td>
+			<td><a {{on "click" (action "goToApartment" unit.BuildingName unit.CompanyName target=this.currentRoute)}}>{{unit.BuildingName}}</a></td>
+			<td><a {{on "click" (action "goToUnit" unit.UnitRentID target=this.currentRoute)}}>{{unit.unitNumber}}</a></td>
+			<td>
+				<span {{on "click" (action "deleteFavourite" unit.UnitRentID target=this.currentRoute)}} style="cursor: pointer;">
+					{{svg-jar "favorite-filled" class="icon-red"}}
+				</span>
+			</td>
+		</tr>
+	{{/each}}
+	</tbody>
+</table>
+{{/if}}
+{{outlet}}

@@ -1,4 +1,17 @@
-<h2>Apartment Details</h2>
+<span style="display: flex; align-items: center;">
+	<h2>Apartment Details</h2>
+	<span style="cursor: pointer;">
+		{{#if (eq this.isFav "true")}}
+			<span {{on "click" (action "deleteFavourite" target=this.currentRoute)}}>
+				{{svg-jar "favorite-filled" class="icon-red"}}
+			</span>
+		{{else}}
+			<span {{on "click" (action "markAsFavourite" target=this.currentRoute)}}>
+				{{svg-jar "favorite-hollow"}}
+			</span>
+		{{/if}}
+	</span>
+</span>
 <table>
 	<tr>
 		<td>Unit Number</td>

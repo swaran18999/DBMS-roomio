@@ -395,12 +395,13 @@ def search_unit(unit_number):
 
 
 # 2
-@app.route('/check_pet_policy_compatibility', methods=['GET'])
+@app.route('/check_pet_policy_compatibility', methods=['POST'])
 @login_required
 def get_pet_policies():
     username = session['username']
-    company_name = request.args.get('company_name')
-    building_name = request.args.get('building_name')
+    data = request.get_json()
+    company_name = data['companyName']
+    building_name = data['buildingName']
 
     # Validate required parameters
     if not all([username, company_name, building_name]):
@@ -413,6 +414,7 @@ def get_pet_policies():
             pp.buildingname,
             p.PetType,
             p.PetSize,
+            p.petName,
             pp.isAllowed,
             CASE 
                 WHEN pp.isAllowed THEN 'Allowed'
@@ -440,10 +442,11 @@ def get_pet_policies():
                 'BuildingName': row[1],
                 'PetType': row[2],
                 'PetSize': row[3],
-                'IsAllowed': row[4],
-                'PetStatus': row[5],
-                'RegistrationFee': row[6],
-                'MonthlyFee': row[7]
+                'PetName': row[4],
+                'IsAllowed': row[5],
+                'PetStatus': row[6],
+                'RegistrationFee': row[7],
+                'MonthlyFee': row[8]
             } for row in result]
             return jsonify({'flag': 1, 'data': data}), 200
         else:
@@ -766,6 +769,118 @@ def delete_comment():
     except Exception as e:
         print(f"Error deleting comment: {e}")
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/get_user_details' , methods = ['GET'])
+@login_required
+def get_user_details():
+
+    userName = session['username']
+
+    query = "SELECT username, first_name, last_name, DOB, gender, email, Phone, passwd FROM Users WHERE username = %s;"
+
+    parameters = (userName,)
+
+    result = fetchQueryResult(query, parameters)
+
+    if result:
+        row = result[0]
+        data = {
+            'UserName': row[0],
+            'FirstName': row[1],
+            'LastName': row[2],
+            'DOB': row[3].isoformat(),
+            'Gender': "Not Known" if row[4] == 0 else "Male" if row[4] == 1 else "Female" if row[4] == 2 else "Not Applicable",
+            'Email': row[5],
+            'Phone': row[6]
+        }
+        return jsonify({'flag': 1, 'data': data}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
+
+@app.route('/add_as_favourite', methods = ['POST'])
+@login_required
+def add_as_favourite():
+
+    data_dict = request.get_json()
+
+    userName = session['username']
+    unitID = data_dict['UnitRentID']
+    
+    query = "INSERT into Favorite (Username, UnitRentID) VALUES (%s, %s);"
+
+    parameters = (userName, unitID)
+
+    result = executeQueryResult(query, parameters)
+
+    if result:
+        return jsonify({'flag': 1, 'data': "Added to fav"}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'Could not add to fav'}), 400
+
+@app.route('/is_favourite/<unitID>', methods = ['GET'])
+@login_required
+def is_favourite(unitID):
+
+    userName = session['username']
+    
+    query = "SELECT * FROM Favorite WHERE Username = %s AND UnitRentID = %s;"
+
+    parameters = (userName, unitID)
+
+    result = fetchQueryResult(query, parameters)
+    
+    if result:
+        return jsonify({'flag': 1, 'isFav': "true"}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'Could not add to fav'}), 404
+
+@app.route('/remove_as_favourite/<unitID>', methods = ['GET'])
+@login_required
+def remove_as_favourite(unitID):
+
+    userName = session['username']
+
+    query = """
+                DELETE FROM Favorite AS F WHERE F.unitrentid = %s AND F.username = %s;
+            """
+    parameters = (unitID, userName)
+
+    result = executeQueryResult(query, parameters)
+    
+    if result:
+        return jsonify({'flag': 1, 'isFav': "false"}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'Could not delete fav'}), 400
+
+
+
+@app.route('/get_user_favourites' , methods = ['GET'])
+@login_required
+def get_user_favourites():
+
+    userName = session['username']
+
+    query = """
+                SELECT F.UnitRentID, A.CompanyName, A.BuildingName, A.unitNumber 
+                FROM Favorite AS F
+                NATURAL JOIN ApartmentUnit AS A
+                WHERE username = %s;
+            """
+
+    parameters = (userName,)
+
+    result = fetchQueryResult(query, parameters)
+
+    if result:
+        data = [{
+            'UnitRentID': row[0],
+            'CompanyName': row[1],
+            'BuildingName': row[2],
+            'unitNumber': row[3]
+        } for row in result]
+        return jsonify({'flag': 1, 'data': data}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'No Favs'}), 404
 
 
 @app.route('/trial')

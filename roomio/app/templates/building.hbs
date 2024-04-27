@@ -26,4 +26,32 @@
 		<td>{{this.NumUnitsAvailableForRent}}</td>
 	</tr>
 </table>
+{{#if (and (not-eq this.compatible_pets.length undefined) (not-eq this.compatible_pets.length 0))}}
+<h2>Pet Compatibility</h2>
+<table>
+	<thead>
+	<tr>
+		<th>Pet Name</th>
+		<th>Pet Size</th>
+		<th>Pet Type</th>
+		<th>Allowed</th>
+	</tr>
+	</thead>
+	<tbody>
+	{{#each this.compatible_pets as |pet|}}
+		<tr>
+			<td>{{pet.PetName}}</td>
+			<td>{{pet.PetSize}}</td>
+			<td>{{pet.PetType}}</td>
+			<td>{{#if pet.IsAllowed}}
+					{{svg-jar "allowed" class="icon-green"}}
+				{{else}}
+					{{svg-jar "not-allowed" class="icon-red"}}
+				{{/if}}
+			</td>
+		</tr>
+	{{/each}}
+	</tbody>
+</table>
+{{/if}}
 {{outlet}}
