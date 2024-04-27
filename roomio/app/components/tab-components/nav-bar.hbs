@@ -19,6 +19,9 @@
       <LinkTo @route="api-test" class="navbar-link" @activeClass="active">API Test</LinkTo>
     </li>
     <li class="navbar-item">
+      <LinkTo @route="user" class="navbar-link" @activeClass="active">User</LinkTo>
+    </li>
+    <li class="navbar-item">
       <a class="logout-button navbar-link" {{on "click" (action "logout")}}>Logout</a>
     </li>
   </ul>

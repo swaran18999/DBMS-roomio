@@ -746,6 +746,33 @@ def delete_comment():
         print(f"Error deleting comment: {e}")
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
+@app.route('/get_user_details' , methods = ['GET'])
+@login_required
+def get_user_details():
+
+    userName = session['username']
+
+    query = "SELECT username, first_name, last_name, DOB, gender, email, Phone, passwd FROM Users WHERE username = %s;"
+
+    parameters = (userName,)
+
+    result = fetchQueryResult(query, parameters)
+
+    if result:
+        row = result[0]
+        data = {
+            'UserName': row[0],
+            'FirstName': row[1],
+            'LastName': row[2],
+            'DOB': row[3].isoformat(),
+            'Gender': "Not Known" if row[4] == 0 else "Male" if row[4] == 1 else "Female" if row[4] == 2 else "Not Applicable",
+            'Email': row[5],
+            'Phone': row[6]
+        }
+        return jsonify({'flag': 1, 'data': data}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
+
 
 @app.route('/trial')
 def trialAPI():
