@@ -23,6 +23,7 @@ label {
 }
 
 input[type="text"],
+input[type="date"],
 input[type="password"] {
   width: calc(100% - 16px);
   padding: 8px;

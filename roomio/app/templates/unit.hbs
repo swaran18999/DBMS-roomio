@@ -1,3 +1,4 @@
+<h2>Apartment Details</h2>
 <table>
 	<tr>
 		<td>Unit Number</td>
@@ -16,3 +17,58 @@
 		<td>{{this.AvailableDateForMoveIn}}</td>
 	</tr>
 </table>
+
+<div class="search-apartment">
+<form {{action "markAsInterested" on="submit"}} style="width:700px">
+	<Input @type="date" @value={{this.moveInDate}} style="width: 120px" required />
+	<Input @type="text" @value={{this.roommatesCount}} placeholder="No. of roommates" style="width: 120px" required />
+	<button type="submit" style="width:250px;">Mark as Interested</button>
+</form>
+</div>
+
+<div style="margin: 40px 0;">
+	<h2>Interest in this Unit</h2>
+	<table>
+	{{#if (or (eq this.interests.length undefined) (eq this.interests.length 0))}}
+		<div class="none-found">No Interests Found!!</div>
+	{{else}}
+		<thead>
+		<tr>
+			<th>First Name</th>
+			<th>Last Name</th>
+			<th>Move In Date</th>
+			<th>Roommates Preferred</th>
+			<th>Delete</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{#each this.interests as |interest|}}
+			<tr>
+				<td>{{interest.FirstName}}</td>
+				<td>{{interest.LastName}}</td>
+				<td>{{interest.MoveInDate}}</td>
+				<td>{{interest.RoommateCnt}}</td>
+				<td>
+					{{#if interest.isUser}}
+						{{#if (eq interest.is_delete true)}}
+							<span {{on "click" (action "confirmDelete" interest target=this.currentRoute)}}>
+								{{svg-jar "delete_forever" class="icon-red icon-clickable"}}
+							</span>
+							<span {{on "click" (action "cancelDelete" interest target=this.currentRoute)}}>
+								{{svg-jar "undo" class="icon-green icon-clickable"}}
+							</span>
+						{{else}}
+							<span {{on "click" (action "deleteInterest" interest target=this.currentRoute)}}>
+								{{svg-jar "delete" class="icon-crimson icon-clickable"}}
+							</span>
+						{{/if}}
+					{{else}}
+						--
+					{{/if}}
+				</td>
+			</tr>
+		{{/each}}
+		</tbody>
+	{{/if}}
+	</table>
+</div>

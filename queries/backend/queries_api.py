@@ -431,6 +431,93 @@ def search_units_by_pet_policy():
         print(f"Error searching units by pet policy: {e}")
         return jsonify({'flag': 0, 'message': f'An error occurred while searching the units: {e}'}), 500
 
+''' 
+4.
+When viewing a specific apartment unit, the user should be able to view others' interests so that the user can join 
+the interest (You are not required to implement the join feature) or post their interest to the unit.
+'''
+
+@app.route('/add_interest', methods=['POST'])
+@login_required
+def add_interest():
+    data = request.get_json()
+
+    if not data or 'UnitRentID' not in data or 'RoommateCnt' not in data or 'MoveInDate' not in data:
+        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
+    
+    username = session['username']
+    unit_rent_id = data['UnitRentID']
+    roommate_cnt = data['RoommateCnt']
+    move_in_date = data['MoveInDate']
+
+    try:
+        query = """
+        INSERT INTO Interests (username, UnitRentID, RoommateCnt, MoveInDate)
+        VALUES (%s, %s, %s, %s);
+        """
+        parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
+        executeQueryResult(query, parameters) 
+
+        return jsonify({'flag': 1, 'message': 'Interest added successfully'}), 201
+    except Exception as e:
+        print(f"Error adding interest: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/view_interests/<unit_number>', methods=['GET'])
+@login_required
+def view_interests(unit_number):
+    # {"UnitRentID":5}
+    # unit_rent_id = request.args.get('UnitRentID')
+    if not unit_number:
+        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
+
+    try:
+        query = """
+        SELECT i.UnitRentID, i.RoommateCnt, i.MoveInDate, u.first_name, u.last_name, u.username
+        FROM Interests i 
+        NATURAL JOIN Users u
+        WHERE i.UnitRentID = %s;
+        """
+        parameters = (unit_number)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'UnitRentID': row[0],
+                'RoommateCnt': row[1],
+                'MoveInDate': row[2].isoformat(),
+                'FirstName': row[3],
+                'LastName': row[4],
+                'isUser': row[5] == session['username']
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No interests found for the specified UnitRentID'}), 404
+    except Exception as e:
+        print(f"Error in fetching interests: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/delete_interest', methods=['POST'])
+@login_required
+def delete_interest():
+    data = request.get_json()
+    if not data or 'UnitRentID' not in data or 'RoommateCnt' not in data or 'MoveInDate' not in data:
+        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
+    
+    username = session['username']
+    unit_rent_id = data['UnitRentID']
+    roommate_cnt = data['RoommateCnt']
+    move_in_date = data['MoveInDate']
+
+    try:
+        query = "DELETE FROM Interests WHERE username = %s AND UnitRentID = %s AND RoommateCnt = %s AND MoveInDate = %s;"
+        parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
+        executeQueryResult(query, parameters)
+
+        return jsonify({'flag': 1, 'message': 'Interest added successfully'}), 201
+    except Exception as e:
+        print(f"Error adding interest: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 # 8
 @app.route('/search_interests', methods=['GET'])
