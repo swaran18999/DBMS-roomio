@@ -286,7 +286,9 @@ SELECT
     companyname, 
     buildingname, 
     CONCAT_WS(', ', addrnum, addrstreet, addrcity, addrstate, addrzipcode) as Address, 
-    yearbuilt 
+    yearbuilt,
+    addrcity,
+    addrzipcode 
 FROM 
     apartmentbuilding;
 
@@ -351,12 +353,23 @@ def search_unit(unit_number):
 
     try:
         query = """
-        SELECT au.UnitRentID, ab.companyname, ab.buildingname, au.unitNumber, au.MonthlyRent, au.squareFootage, au.AvailableDateForMoveIn, ao.amenitieslist
+        SELECT au.UnitRentID, ab.companyname, ab.buildingname, au.unitNumber, au.MonthlyRent, au.squareFootage, au.AvailableDateForMoveIn, ao.amenitieslist,
+            COALESCE(
+                (
+                    SELECT AVG(au2.MonthlyRent)
+                    FROM auextra au2
+                    NATURAL JOIN ApartmentBuilding ab2
+                    WHERE ABS(au.squareFootage - au2.squareFootage) <= 0.10 * au.squareFootage
+                    AND ab2.AddrCity = ab.AddrCity AND au2.UnitRentID != au.UnitRentID
+                ),
+                0  
+            ) AS Rent_Extra_View
         FROM auextra au
         NATURAL JOIN ab_formatted ab
         NATURAL JOIN amenitiesoffered ao
         WHERE au.unitrentid = %s;
         """
+
         parameters = (unit_rent_id,)
         result = fetchQueryResult(query, parameters)
 
@@ -370,7 +383,8 @@ def search_unit(unit_number):
                     'MonthlyRent': row[4],#
                     'SquareFootage': row[5],#
                     'AvailableDateForMoveIn': row[6].isoformat(),#
-                    'AmenitiesList': row[7]  # 
+                    'AmenitiesList': row[7],  #
+                    'Rent_Extra_View': row[8] if row[8] != 0 else 'No similar houses' 
                 } 
             return jsonify({'flag': 1, 'data': data}), 200
         else:
@@ -595,43 +609,43 @@ def average_rent_by_xbxb():
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 # 11
-@app.route('/rent_extra_view', methods=['GET'])
-def rent_extra_view():
-    # Retrieve the UnitRentID from query parameters
-    print(request.args)
-    unit_rent_id = request.args.get('UnitRentID')
-    if not unit_rent_id:
-        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
+# @app.route('/rent_extra_view', methods=['GET'])
+# def rent_extra_view():
+#     # Retrieve the UnitRentID from query parameters
+#     print(request.args)
+#     unit_rent_id = request.args.get('UnitRentID')
+#     if not unit_rent_id:
+#         return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
 
-    try:
-        query = """
-        SELECT au.UnitRentID, au.MonthlyRent, (
-            SELECT AVG(au2.MonthlyRent)
-            FROM auextra au2
-            NATURAL JOIN ApartmentBuilding ab2
-            WHERE ABS(au.squareFootage - au2.squareFootage) <= 0.10 * au.squareFootage
-            AND ab2.AddrCity = ab.AddrCity AND au2.UnitRentID != au.UnitRentID) AS Extra_View
-        FROM
-        auextra au 
-        NATURAL JOIN ApartmentBuilding ab
-        WHERE au.UnitRentID = %s;
-        """
-        parameters = (unit_rent_id,)
-        result = fetchQueryResult(query, parameters)
+#     try:
+#         query = """
+#         SELECT au.UnitRentID, au.MonthlyRent, (
+#             SELECT AVG(au2.MonthlyRent)
+#             FROM auextra au2
+#             NATURAL JOIN ApartmentBuilding ab2
+#             WHERE ABS(au.squareFootage - au2.squareFootage) <= 0.10 * au.squareFootage
+#             AND ab2.AddrCity = ab.AddrCity AND au2.UnitRentID != au.UnitRentID) AS Extra_View
+#         FROM
+#         auextra au 
+#         NATURAL JOIN ApartmentBuilding ab
+#         WHERE au.UnitRentID = %s;
+#         """
+#         parameters = (unit_rent_id,)
+#         result = fetchQueryResult(query, parameters)
 
-        if result:
-            data = [{
-                'UnitRentID': row[0],
-                'MonthlyRent': float(row[1]),
-                'ExtraView': float(row[2]) if row[2] is not None else None
-            } for row in result]
-            return jsonify({'flag': 1, 'data': data}), 200
-        else:
-            print("Result was empty")
-            return jsonify({'flag': 0, 'message': 'No data found for the specified UnitRentID'}), 404
-    except Exception as e:
-        print(f"Error in fetching rent extra view: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+#         if result:
+#             data = [{
+#                 'UnitRentID': row[0],
+#                 'MonthlyRent': float(row[1]),
+#                 'ExtraView': float(row[2]) if row[2] is not None else None
+#             } for row in result]
+#             return jsonify({'flag': 1, 'data': data}), 200
+#         else:
+#             print("Result was empty")
+#             return jsonify({'flag': 0, 'message': 'No data found for the specified UnitRentID'}), 404
+#     except Exception as e:
+#         print(f"Error in fetching rent extra view: {e}")
+#         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 
 

@@ -22,6 +22,7 @@ export default Route.extend({
         this.controller.set('UnitNumber', data.UnitNumber);
         this.controller.set('SquareFootage', data.SquareFootage);
         this.controller.set('AmenitiesList',data.AmenitiesList);
+        this.controller.set('Rent_Extra_View',data.Rent_Extra_View);
       },
       (err) => {
         if (err.status == 401) {
