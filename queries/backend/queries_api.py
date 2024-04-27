@@ -267,169 +267,168 @@ def search_apartment():
 ''' 
 5. Search by building 
 Search by Unit
+Creating useful views 
+
+CREATE VIEW AuExtra as
+SELECT au.*, CONCAT(
+	(SELECT COUNT(*) 
+     FROM Rooms r 
+     WHERE au.UnitRentID = r.UnitRentID and r.name like 'bedroom%'),'b',
+     (SELECT COUNT(*) 
+     FROM Rooms r 
+     WHERE au.UnitRentID = r.UnitRentID and r.name like 'bathroom%'),'b') as XbXb
+FROM ApartmentUnit au;
+
+
+
+create view ab_formatted as
+SELECT 
+    companyname, 
+    buildingname, 
+    CONCAT_WS(', ', addrnum, addrstreet, addrcity, addrstate, addrzipcode) as Address, 
+    yearbuilt 
+FROM 
+    apartmentbuilding;
+
+create view amenitiesoffered as 
+select companyname, buildingname, string_agg(atype,', ') as amenitieslist
+from Provides
+group by companyname, buildingname;
+
 '''
-@app.route('/search_building/<building_name>', methods=['GET'])
-def search_building(building_name):
+
+@app.route('/search_building', methods=['GET'])
+def search_building():
+    building_name = request.args.get('buildingName')
+    if not building_name:
+        return jsonify({'flag': 0, 'message': 'Building name parameter is required'}), 400
+
     try:
-        building_name = unquote(building_name)
         query = """
-            SELECT AB.CompanyName, AB.BuildingName, AB.AddrNum, AB.AddrStreet, AB.AddrCity, AB.AddrState, AB.AddrZipCode, AB.YearBuilt, 
-                   AvailableUnits.NumberOfAvailableUnits, A.aType AS AmenityType, A.Description AS AmenityDescription
-            FROM ApartmentBuilding AB
-            LEFT JOIN (
-                SELECT CompanyName, BuildingName, COUNT(*) AS NumberOfAvailableUnits
-                FROM ApartmentUnit
-                WHERE AvailableDateForMoveIn > CURRENT_DATE
-                GROUP BY CompanyName, BuildingName
-            ) AS AvailableUnits ON AB.CompanyName = AvailableUnits.CompanyName AND AB.BuildingName = AvailableUnits.BuildingName
-            LEFT JOIN Provides P ON AB.CompanyName = P.CompanyName AND AB.BuildingName = P.BuildingName
-            LEFT JOIN Amenities A ON P.aType = A.aType
-            WHERE AB.BuildingName = %s
-            ORDER BY AB.CompanyName, AB.BuildingName, A.aType;
+        select * from amenitiesoffered ao
+        natural join
+        (select ab.companyname, ab.buildingname, ab.address, ab.yearbuilt,COUNT(au.unitrentid) as Numunitsavailableforrent
+        from ab_formatted ab
+        natural join auextra au
+        group by ab.companyname, ab.buildingname, ab.address, ab.yearbuilt) as buildings
+        where buildingname = %s;
         """
         parameters = (building_name,)
-
         result = fetchQueryResult(query, parameters)
 
         if result:
-            data = []
-            for row in result:
-                data.append({
-                    'CompanyName': row[0],
-                    'BuildingName': row[1],
-                    'AddrNum': row[2],
-                    'AddrStreet': row[3],
-                    'AddrCity': row[4],
-                    'AddrState': row[5],
-                    'AddrZipCode': row[6],
-                    'YearBuilt': row[7],
-                    'NumberOfAvailableUnits': row[8],
-                    'AmenityType': row[9],
-                    'AmenityDescription': row[10]
-                })
+            data = [{
+                'CompanyName': row[0],
+                'BuildingName': row[1],
+                'amenitieslist': row[2],
+                'Address': row[3],
+                'YearBuilt': row[4],
+                'NumUnitsAvailableForRent': row[5]
+            } for row in result]
             return jsonify({'flag': 1, 'data': data}), 200
         else:
-            return jsonify({'flag': 0, 'message': 'No building found'}), 404
+            return jsonify({'flag': 0, 'data': [], 'message': 'No buildings found with the specified name'}), 200
     except Exception as e:
-        print(f"Error searching building: {e}")
-        return jsonify({'flag': 0, 'message': 'An error occurred while searching the building'}), 500
+        print(f"Error searching by building: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 
-@app.route('/search_unit/<unit_number>', methods=['GET'])
-def search_unit(unit_number):
+@app.route('/search_unit', methods=['GET'])
+def search_unit():
+    # {"unitRentID":1}
+    print(request.args)
+    unit_rent_id = request.args.get('unitRentID')
+    print('here',unit_rent_id)
+    if not unit_rent_id:
+        return jsonify({'flag': 0, 'message': 'Unit Rent ID parameter is required'}), 400
+
     try:
-        unit_number = unquote(unit_number)
-        # query = """
-        #     SELECT AB.CompanyName, AB.BuildingName, AB.AddrNum, AB.AddrStreet, AB.AddrCity, AB.AddrState, AB.AddrZipCode, AB.YearBuilt,
-        #            AU.UnitRentID, AU.unitNumber, AU.MonthlyRent, AU.squareFootage, AU.AvailableDateForMoveIn,
-        #            PA.aType AS AmenityType, A.Description AS AmenityDescription
-        #     FROM ApartmentUnit AU
-        #     INNER JOIN ApartmentBuilding AB ON AU.CompanyName = AB.CompanyName AND AU.BuildingName = AB.BuildingName
-        #     LEFT JOIN Provides PA ON AB.CompanyName = PA.CompanyName AND AB.BuildingName = PA.BuildingName
-        #     LEFT JOIN Amenities A ON PA.aType = A.aType
-        #     WHERE AU.unitNumber = %s;
-        # """
         query = """
-            SELECT AU.UnitRentID, AU.UnitNumber, AU.MonthlyRent, AU.SquareFootage, AU.AvailableDateForMoveIn
-            FROM ApartmentUnit AU
-            WHERE AU.UnitRentID = %s;
+        SELECT au.UnitRentID, ab.companyname, ab.buildingname, au.unitNumber, au.MonthlyRent, au.squareFootage, au.AvailableDateForMoveIn, ao.amenitieslist
+        FROM auextra au
+        NATURAL JOIN ab_formatted ab
+        NATURAL JOIN amenitiesoffered ao
+        WHERE au.unitrentid = %s;
         """
-        parameters = (unit_number,)
-
-        result = fetchQueryResult(query, parameters)
-
-        if result:
-            for row in result:
-                # data.append({
-                #     'CompanyName': row[0],
-                #     'BuildingName': row[1],
-                #     'AddrNum': row[2],
-                #     'AddrStreet': row[3],
-                #     'AddrCity': row[4],
-                #     'AddrState': row[5],
-                #     'AddrZipCode': row[6],
-                #     'YearBuilt': row[7],
-                #     'UnitRentID': row[8],
-                #     'unitNumber': row[9],
-                #     'MonthlyRent': row[10],
-                #     'squareFootage': row[11],
-                #     'AvailableDateForMoveIn': row[12],
-                #     'AmenityType': row[13],
-                #     'AmenityDescription': row[14]
-                # })
-                data = {
-                    "UnitRentID": row[0], 
-                    "UnitNumber": row[1], 
-                    "MonthlyRent": row[2], 
-                    "squareFootage": row[3], 
-                    "AvailableDateForMoveIn": row[4].isoformat()
-                }
-            return jsonify({'flag': 1, 'data': data}), 200
-        else:
-            return jsonify({'flag': 0, 'message': 'No unit found with the given number'}), 404
-    except Exception as e:
-        print(f"Error searching unit: {e}")
-        return jsonify({'flag': 0, 'message': 'An error occurred while searching the unit'}), 500
-
-# 2
-@app.route('/search_units_by_pet_policy', methods=['GET'])
-@login_required
-def search_units_by_pet_policy():
-    try:
-        # Retrieving parameters from query string
-        print(session)
-        username = session['username']
-        company_name = request.args.get('company_name')
-        building_name = request.args.get('building_name')
-
-        # Ensuring all required parameters are provided
-        if not all([username, company_name, building_name]):
-            return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
-
-        query = """ 
-        SELECT 
-            DISTINCT(au.UnitRentID), 
-            au.unitNumber, 
-            au.MonthlyRent, 
-            au.squareFootage, 
-            au.AvailableDateForMoveIn
-        FROM 
-            ApartmentUnit au
-            INNER JOIN PetPolicy pp ON au.CompanyName = pp.CompanyName AND au.BuildingName = pp.BuildingName
-            LEFT JOIN Pets p ON pp.PetType = p.PetType AND pp.PetSize = p.PetSize AND p.username = %s
-        WHERE 
-            au.BuildingName = %s AND
-            au.CompanyName = %s AND
-            (pp.isAllowed = TRUE OR p.PetName IS NULL)
-        GROUP BY 
-            au.UnitRentID, 
-            au.unitNumber, 
-            au.MonthlyRent, 
-            au.squareFootage, 
-            au.AvailableDateForMoveIn
-        HAVING 
-            COUNT(DISTINCT CONCAT(p.PetType, '-', p.PetSize)) = 
-            (SELECT COUNT(DISTINCT CONCAT(up.PetType, '-', up.PetSize)) FROM Pets up WHERE username = %s)
-            OR NOT EXISTS (SELECT 1 FROM Pets WHERE username = %s);
-        """
-
-        parameters = (username, building_name, company_name, username, username)
+        parameters = (unit_rent_id,)
         result = fetchQueryResult(query, parameters)
 
         if result:
             data = [{
                 'UnitRentID': row[0],
-                'unitNumber': row[1],
-                'MonthlyRent': row[2],
-                'squareFootage': row[3],
-                'AvailableDateForMoveIn': row[4]
+                'CompanyName': row[1],
+                'BuildingName': row[2],
+                'UnitNumber': row[3],
+                'MonthlyRent': row[4],
+                'SquareFootage': row[5],
+                'AvailableDateForMoveIn': row[6].isoformat(),
+                'AmenitiesList': row[7]  # Convert date to ISO format
             } for row in result]
             return jsonify({'flag': 1, 'data': data}), 200
         else:
-            return jsonify({'flag': 0, 'message': 'No units found matching criteria'}), 404
+            return jsonify({'flag': 0, 'data': [], 'message': 'No unit found with the specified ID'}), 200
     except Exception as e:
-        print(f"Error searching units by pet policy: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred while searching the units: {e}'}), 500
+        print(f"Error searching by unit: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+
+# 2
+@app.route('/check_pet_policy_compatibility', methods=['GET'])
+@login_required
+def get_pet_policies():
+    username = session['username']
+    company_name = request.args.get('company_name')
+    building_name = request.args.get('building_name')
+
+    # Validate required parameters
+    if not all([username, company_name, building_name]):
+        return jsonify({'flag': 0, 'message': 'Missing required query parameters'}), 400
+
+    try:
+        query = """
+        SELECT 
+            pp.companyname,
+            pp.buildingname,
+            p.PetType,
+            p.PetSize,
+            pp.isAllowed,
+            CASE 
+                WHEN pp.isAllowed THEN 'Allowed'
+                ELSE 'Not Allowed' 
+            END AS PetStatus,
+            pp.RegistrationFee,
+            pp.MonthlyFee
+        FROM 
+            Pets p
+        JOIN 
+            Users u ON p.username = u.username
+        JOIN 
+            PetPolicy pp ON pp.PetType = p.PetType AND pp.PetSize = p.PetSize
+        WHERE 
+            u.username = %s AND 
+            pp.CompanyName = %s AND 
+            pp.BuildingName = %s;
+        """
+        parameters = (username, company_name, building_name)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'CompanyName': row[0],
+                'BuildingName': row[1],
+                'PetType': row[2],
+                'PetSize': row[3],
+                'IsAllowed': row[4],
+                'PetStatus': row[5],
+                'RegistrationFee': row[6],
+                'MonthlyFee': row[7]
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No pet policies found for the specified parameters'}), 404
+    except Exception as e:
+        print(f"Error in fetching pet policies: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 ''' 
 4.
