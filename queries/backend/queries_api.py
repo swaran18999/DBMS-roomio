@@ -848,13 +848,12 @@ def get_user_favourites():
     result = fetchQueryResult(query, parameters)
 
     if result:
-        row = result[0]
-        data = {
+        data = [{
             'UnitRentID': row[0],
             'CompanyName': row[1],
             'BuildingName': row[2],
             'unitNumber': row[3]
-        }
+        } for row in result]
         return jsonify({'flag': 1, 'data': data}), 200
     else:
         return jsonify({'flag': 0, 'message': 'No Favs'}), 404
