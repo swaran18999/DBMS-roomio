@@ -297,13 +297,17 @@ group by companyname, buildingname;
 
 '''
 
-@app.route('/search_building', methods=['GET'])
+@app.route('/search_building', methods=['POST'])
 def search_building():
-    building_name = request.args.get('buildingName')
-    if not building_name:
-        return jsonify({'flag': 0, 'message': 'Building name parameter is required'}), 400
-
     try:
+        data_dict = request.get_json()
+        print("PRINTING DATA DICT",data_dict)
+        company_name = data_dict.get('companyName')
+        building_name = data_dict.get('buildingName')
+        
+        if not company_name or not building_name:
+            return jsonify({'flag': 0, 'message': 'Company name and building name are required'}), 400
+
         query = """
         select * from amenitiesoffered ao
         natural join
@@ -311,26 +315,29 @@ def search_building():
         from ab_formatted ab
         natural join auextra au
         group by ab.companyname, ab.buildingname, ab.address, ab.yearbuilt) as buildings
-        where buildingname = %s;
+        where companyname = %s and buildingname = %s;
         """
-        parameters = (building_name,)
+        parameters = (company_name, building_name)
+
         result = fetchQueryResult(query, parameters)
 
         if result:
-            data = [{
+            data = {}
+            for row in result:  # only one row is going to return in anycase
+                data = {
                 'CompanyName': row[0],
                 'BuildingName': row[1],
                 'amenitieslist': row[2],
                 'Address': row[3],
                 'YearBuilt': row[4],
                 'NumUnitsAvailableForRent': row[5]
-            } for row in result]
+            }
             return jsonify({'flag': 1, 'data': data}), 200
         else:
-            return jsonify({'flag': 0, 'data': [], 'message': 'No buildings found with the specified name'}), 200
+            return jsonify({'flag': 0, 'data': [], 'message': 'No apartments found for the given company and building'}), 200
     except Exception as e:
-        print(f"Error searching by building: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+        print(f"Error searching apartments: {e}")
+        return jsonify({'flag': 0, 'message': 'An error occurred while searching apartments'}), 500
 
 
 @app.route('/search_unit/<unit_number>', methods=['GET'])

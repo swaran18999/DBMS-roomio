@@ -9,23 +9,27 @@ export default Route.extend({
     let company = params.to.params['company'];
     let building = params.to.params['building'];
     console.log(company, building)
-    // this.ajaxfw.request('/search_unit/' + unitID).then(
-    //   (res) => {
-    //     let data = res.data;
-    //     this.controller.set(
-    //       'AvailableDateForMoveIn',
-    //       data.AvailableDateForMoveIn
-    //     );
-    //     this.controller.set('MonthlyRent', data.MonthlyRent);
-    //     this.controller.set('UnitNumber', data.UnitNumber);
-    //     this.controller.set('squareFootage', data.squareFootage);
-    //   },
-    //   (err) => {
-    //     if (err.status == 401) {
-    //       this.router.transitionTo('login');
-    //     }
-    //     console.error(err);
-    //   }
-    // );
+    this.ajaxfw.post('/search_building', {
+      data: {
+        "companyName": company,
+        "buildingName": building
+      }
+    }).then(
+      (res) => {
+        let data = res.data;
+        this.controller.set('CompanyName', data.CompanyName);
+        this.controller.set('BuildingName', data.BuildingName);
+        this.controller.set('Address', data.Address);
+        this.controller.set('amenitieslist',data.amenitieslist);
+        this.controller.set('YearBuilt',data.YearBuilt);
+        this.controller.set('NumUnitsAvailableForRent',data.NumUnitsAvailableForRent);
+      },
+      (err) => {
+        if (err.status == 401) {
+          this.router.transitionTo('login');
+        }
+        console.error(err);
+      }
+    );
   },
 });
