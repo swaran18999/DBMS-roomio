@@ -9,6 +9,9 @@ export default Component.extend({
 	companyName: 'Ramos Inc',
 
 	actions: {
+		goToUnit(UnitRentID) {
+			this.router.transitionTo("unit", UnitRentID)
+		},
 		searchApartments() {
 			this.set("searchOutputUnits", null);
 			let data = {

@@ -319,40 +319,51 @@ def search_building(building_name):
 def search_unit(unit_number):
     try:
         unit_number = unquote(unit_number)
+        # query = """
+        #     SELECT AB.CompanyName, AB.BuildingName, AB.AddrNum, AB.AddrStreet, AB.AddrCity, AB.AddrState, AB.AddrZipCode, AB.YearBuilt,
+        #            AU.UnitRentID, AU.unitNumber, AU.MonthlyRent, AU.squareFootage, AU.AvailableDateForMoveIn,
+        #            PA.aType AS AmenityType, A.Description AS AmenityDescription
+        #     FROM ApartmentUnit AU
+        #     INNER JOIN ApartmentBuilding AB ON AU.CompanyName = AB.CompanyName AND AU.BuildingName = AB.BuildingName
+        #     LEFT JOIN Provides PA ON AB.CompanyName = PA.CompanyName AND AB.BuildingName = PA.BuildingName
+        #     LEFT JOIN Amenities A ON PA.aType = A.aType
+        #     WHERE AU.unitNumber = %s;
+        # """
         query = """
-            SELECT AB.CompanyName, AB.BuildingName, AB.AddrNum, AB.AddrStreet, AB.AddrCity, AB.AddrState, AB.AddrZipCode, AB.YearBuilt,
-                   AU.UnitRentID, AU.unitNumber, AU.MonthlyRent, AU.squareFootage, AU.AvailableDateForMoveIn,
-                   PA.aType AS AmenityType, A.Description AS AmenityDescription
+            SELECT AU.UnitRentID, AU.UnitNumber, AU.MonthlyRent, AU.SquareFootage, AU.AvailableDateForMoveIn
             FROM ApartmentUnit AU
-            INNER JOIN ApartmentBuilding AB ON AU.CompanyName = AB.CompanyName AND AU.BuildingName = AB.BuildingName
-            LEFT JOIN Provides PA ON AB.CompanyName = PA.CompanyName AND AB.BuildingName = PA.BuildingName
-            LEFT JOIN Amenities A ON PA.aType = A.aType
-            WHERE AU.unitNumber = %s;
+            WHERE AU.UnitRentID = %s;
         """
         parameters = (unit_number,)
 
         result = fetchQueryResult(query, parameters)
 
         if result:
-            data = []
             for row in result:
-                data.append({
-                    'CompanyName': row[0],
-                    'BuildingName': row[1],
-                    'AddrNum': row[2],
-                    'AddrStreet': row[3],
-                    'AddrCity': row[4],
-                    'AddrState': row[5],
-                    'AddrZipCode': row[6],
-                    'YearBuilt': row[7],
-                    'UnitRentID': row[8],
-                    'unitNumber': row[9],
-                    'MonthlyRent': row[10],
-                    'squareFootage': row[11],
-                    'AvailableDateForMoveIn': row[12],
-                    'AmenityType': row[13],
-                    'AmenityDescription': row[14]
-                })
+                # data.append({
+                #     'CompanyName': row[0],
+                #     'BuildingName': row[1],
+                #     'AddrNum': row[2],
+                #     'AddrStreet': row[3],
+                #     'AddrCity': row[4],
+                #     'AddrState': row[5],
+                #     'AddrZipCode': row[6],
+                #     'YearBuilt': row[7],
+                #     'UnitRentID': row[8],
+                #     'unitNumber': row[9],
+                #     'MonthlyRent': row[10],
+                #     'squareFootage': row[11],
+                #     'AvailableDateForMoveIn': row[12],
+                #     'AmenityType': row[13],
+                #     'AmenityDescription': row[14]
+                # })
+                data = {
+                    "UnitRentID": row[0], 
+                    "UnitNumber": row[1], 
+                    "MonthlyRent": row[2], 
+                    "squareFootage": row[3], 
+                    "AvailableDateForMoveIn": row[4].isoformat()
+                }
             return jsonify({'flag': 1, 'data': data}), 200
         else:
             return jsonify({'flag': 0, 'message': 'No unit found with the given number'}), 404

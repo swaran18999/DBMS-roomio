@@ -28,7 +28,7 @@
 		<tr>
 			<td>{{rental.CompanyName}}</td>
 			<td>{{rental.BuildingName}}</td>
-			<td>{{rental.UnitNumber}}</td>
+			<td><a {{on "click" (action "goToUnit" rental.UnitRentID)}}>{{rental.UnitNumber}}</a></td>
 			<td>{{rental.MonthlyRent}}</td>
 			<td>{{rental.SquareFootage}}</td>
 			<td>{{rental.AvailableDateForMoveIn}}</td>
