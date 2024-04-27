@@ -28,9 +28,11 @@ export default Route.extend({
       }
     );
     this.getInterests(unitID);
+    this.getComments(unitID);
   },
   setupController(controller) {
     controller.set('currentRoute', this);
+    controller.set("rating", 3);
   },
   getInterests(unitID) {
     this.ajaxfw.request('/view_interests/' + unitID).then(
@@ -46,7 +48,44 @@ export default Route.extend({
       }
     )
   },
+  getComments(unitID) {
+    this.ajaxfw.request('/view_comments/' + unitID).then(
+      (res) => {
+        console.log(res)
+        this.controller.set("ratings", res.data)
+      },
+      (err) => {
+        this.controller.set("ratings", null)
+        if (err.status == 401) {
+          this.router.transitionTo('login');
+        }
+        console.error(err);
+      }
+    )
+  },
   actions: {
+    confirmRatingDelete(rating) {
+      let unitID = this.controller.get("unitID");
+      this.ajaxfw
+      .request('/delete_comment', {
+        method: 'POST',
+        data: {
+          "CommentID": rating.CommentID
+        },
+      })
+      .then(
+        (res) => {
+          console.log(res);
+          this.getComments(unitID);
+        },
+        (err) => {
+          if (err.status == 401) {
+            this.router.transitionTo('login');
+          }
+          console.error(err);
+        }
+      );
+    },
     confirmDelete(interest) {
       let unitID = this.controller.get("unitID");
       this.ajaxfw
@@ -73,6 +112,12 @@ export default Route.extend({
     deleteInterest(unit) {
       set(unit, "is_delete", true)
     },
+    deleteRating(rating) {
+      set(rating, "is_delete", true)
+    },
+    cancelRatingDelete(rating) {
+      set(rating, "is_delete", false)
+    },
     markAsInterested() {
       let unitID = this.controller.get("unitID");
       let moveInDate = this.controller.get("moveInDate");
@@ -92,6 +137,31 @@ export default Route.extend({
           console.log(err);
         }
       );
-    }
+    },
+    confirmRating(stars) {
+      this.controller.set("rating", stars)
+    },
+    addRating() {
+      let unitID = this.controller.get("unitID");
+      let rating = this.controller.get("rating");
+      let commentText = this.controller.get("commentText");
+      console.log(unitID, rating, commentText);
+      
+      let data = {
+        "UnitRentID": unitID,
+        "Rating": rating,
+        "Comment": commentText
+      };
+      console.log(data)
+      this.ajaxfw.post('/add_comment', { data: data }).then(
+        (res) => {
+          console.log(res);
+          this.getComments(unitID);
+        },
+        (err) => {
+          console.log(err);
+        }
+      );
+    },
   }
 });

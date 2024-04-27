@@ -72,3 +72,126 @@
 	{{/if}}
 	</table>
 </div>
+
+<div style="margin: 40px 0;">
+	<h2>Rate this Unit</h2>
+	<form {{action "addRating" on="submit"}}>
+		<div class="form-group">
+			<div style="display: flex; align-items: center;">
+				<span>Rating:</span>
+				<span style="margin-left: 10px;">
+				<span class="star" {{on "click" (action "confirmRating" 1 target=this.currentRoute)}}>
+					{{#if (gte this.rating 1)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else}}
+						{{svg-jar "star-hollow"}}
+					{{/if}}
+				</span>
+				<span class="star" {{on "click" (action "confirmRating" 2 target=this.currentRoute)}}>
+					{{#if (gte this.rating 2)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else}}
+						{{svg-jar "star-hollow"}}
+					{{/if}}
+				</span>
+				<span class="star" {{on "click" (action "confirmRating" 3 target=this.currentRoute)}}>
+					{{#if (gte this.rating 3)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else}}
+						{{svg-jar "star-hollow"}}
+					{{/if}}
+				</span>
+				<span class="star" {{on "click" (action "confirmRating" 4 target=this.currentRoute)}}>
+					{{#if (gte this.rating 4)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else}}
+						{{svg-jar "star-hollow"}}
+					{{/if}}
+				</span>
+				<span class="star" {{on "click" (action "confirmRating" 5 target=this.currentRoute)}}>
+					{{#if (gte this.rating 5)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else}}
+						{{svg-jar "star-hollow"}}
+					{{/if}}
+				</span>
+				</span>
+			</div>
+
+			{{!-- <label for="rating">Rating (0 - 5):</label>
+				<Input @type="number" id="rating" @value={{this.rating}} max=5 min=1 required /> --}}
+			</div>
+			<div class="form-group">
+				<label for="comment">Comment:</label>
+				<Textarea @value={{this.commentText}} id="comment" style="width: 300px; height: 60px;" required />
+			</div> 
+		<button type="submit">Submit Rating</button>
+	</form>
+</div>
+
+<div style="margin: 40px 0;">
+	<h2>Ratings for this Unit</h2>
+	<table>
+	{{#if (or (eq this.ratings.length undefined) (eq this.ratings.length 0))}}
+		<div class="none-found">No Ratings Found!!</div>
+	{{else}}
+		<thead>
+		<tr>
+			<th>UserName</th>
+			<th>Comment</th>
+			<th>Rating</th>
+			<th>Delete</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{#each this.ratings as |rating|}}
+			<tr>
+				<td>{{rating.UserName}}</td>
+				<td>{{rating.Comment}}</td>
+				<td>
+					{{#if (eq rating.Rating 5)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else if (eq rating.Rating 4)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else if (eq rating.Rating 3)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else if (eq rating.Rating 2)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{else if (eq rating.Rating 1)}}
+						{{svg-jar "star-filled" class="icon-gold"}}
+					{{/if}}
+					</td>
+				<td>
+					{{#if rating.isUser}}
+						{{#if (eq rating.is_delete true)}}
+							<span {{on "click" (action "confirmRatingDelete" rating target=this.currentRoute)}}>
+								{{svg-jar "delete_forever" class="icon-red icon-clickable"}}
+							</span>
+							<span {{on "click" (action "cancelRatingDelete" rating target=this.currentRoute)}}>
+								{{svg-jar "undo" class="icon-green icon-clickable"}}
+							</span>
+						{{else}}
+							<span {{on "click" (action "deleteRating" rating target=this.currentRoute)}}>
+								{{svg-jar "delete" class="icon-crimson icon-clickable"}}
+							</span>
+						{{/if}}
+					{{else}}
+						--
+					{{/if}}
+				</td>
+			</tr>
+		{{/each}}
+		</tbody>
+	{{/if}}
+	</table>
+</div>

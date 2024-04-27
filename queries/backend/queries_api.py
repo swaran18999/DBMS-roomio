@@ -667,6 +667,86 @@ def executeQueryResult(query, parameters):
         print("Post failed due to",e)
         return False
 
+# 13 Comment system
+@app.route('/add_comment', methods=['POST'])
+@login_required
+def add_comment():
+    data = request.get_json()
+
+    if not data or 'UnitRentID' not in data or 'Rating' not in data or 'Comment' not in data:
+        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
+    
+    username = session['username']
+    unit_rent_id = data['UnitRentID']
+    rating = data['Rating']
+    comment_text = data['Comment']
+
+    try:
+        query = """
+        INSERT INTO Comments (username, UnitRentID, Rating, Comment)
+        VALUES (%s, %s, %s, %s);
+        """
+        parameters = (username, unit_rent_id, rating, comment_text)
+        executeQueryResult(query, parameters) 
+
+        return jsonify({'flag': 1, 'message': 'Comment added successfully'}), 201
+    except Exception as e:
+        print(f"Error adding comment: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/view_comments/<unit_number>', methods=['GET'])
+@login_required
+def view_comments(unit_number):
+    if not unit_number:
+        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
+
+    try:
+        query = """
+        SELECT c.UnitRentID, c.Rating, c.Comment, u.first_name, u.last_name, u.username, c.CommentID
+        FROM Comments c 
+        NATURAL JOIN Users u
+        WHERE c.UnitRentID = %s;
+        """
+        parameters = (unit_number,)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'UnitRentID': row[0],
+                'Rating': row[1],
+                'Comment': row[2],
+                'FirstName': row[3],
+                'LastName': row[4],
+                'UserName': row[5],
+                'CommentID': row[6],
+                'isUser': row[5] == session['username']
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
+    except Exception as e:
+        print(f"Error in fetching comments: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/delete_comment', methods=['POST'])
+@login_required
+def delete_comment():
+    data = request.get_json()
+    
+    username = session['username']
+    CommentID = data['CommentID']
+
+    try:
+        query = "DELETE FROM Comments WHERE username = %s AND CommentID = %s;"
+        parameters = (username, CommentID)
+        executeQueryResult(query, parameters)
+
+        return jsonify({'flag': 1, 'message': 'Comment deleted successfully'}), 200
+    except Exception as e:
+        print(f"Error deleting comment: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+
 @app.route('/trial')
 def trialAPI():
     return jsonify(fetchQueryResult("Select * from Users", {}))

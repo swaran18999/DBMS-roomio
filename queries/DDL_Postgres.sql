@@ -106,3 +106,14 @@ CREATE TABLE Provides (
     FOREIGN KEY (CompanyName, BuildingName) REFERENCES ApartmentBuilding (CompanyName, BuildingName),
     PRIMARY KEY (CompanyName, BuildingName, aType)
 );
+
+CREATE TABLE Comments (
+    CommentID SERIAL PRIMARY KEY,
+    Username VARCHAR(255) NOT NULL,
+    UnitRentID INT NOT NULL,
+    Rating INT NOT NULL,
+    Comment TEXT NOT NULL,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (Username) REFERENCES Users(username),
+    FOREIGN KEY (UnitRentID) REFERENCES ApartmentUnit(UnitRentID)
+);

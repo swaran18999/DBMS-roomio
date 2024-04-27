@@ -21,3 +21,7 @@
 .icon-clickable {
   cursor: pointer;
 }
+
+.icon-gold {
+  fill: gold
+}
