@@ -17,9 +17,13 @@ export default Route.extend({
         );
         this.controller.set("unitID", unitID);
         this.controller.set("isFav", false);
+        this.controller.set('CompanyName',data.CompanyName);
+        this.controller.set('BuildingName',data.BuildingName);
         this.controller.set('MonthlyRent', data.MonthlyRent);
         this.controller.set('UnitNumber', data.UnitNumber);
-        this.controller.set('squareFootage', data.squareFootage);
+        this.controller.set('SquareFootage', data.SquareFootage);
+        this.controller.set('AmenitiesList',data.AmenitiesList);
+        this.controller.set('Rent_Extra_View',data.Rent_Extra_View);
       },
       (err) => {
         if (err.status == 401) {
