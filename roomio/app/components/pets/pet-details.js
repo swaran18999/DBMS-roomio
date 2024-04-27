@@ -6,9 +6,8 @@ export default Component.extend({
   ajaxfw: service(),
   router: service(),
   petName: '',
-  petType: '',
-  petSize: '',
-  username: '',
+  petType: 'Dog',
+  petSize: 'Small',
 
   actions: {
     petTypeChanged(event) {
