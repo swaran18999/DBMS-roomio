@@ -333,11 +333,11 @@ def search_building():
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 
-@app.route('/search_unit', methods=['GET'])
-def search_unit():
+@app.route('/search_unit/<unit_number>', methods=['GET'])
+def search_unit(unit_number):
     # {"unitRentID":1}
     print(request.args)
-    unit_rent_id = request.args.get('unitRentID')
+    unit_rent_id = unit_number
     print('here',unit_rent_id)
     if not unit_rent_id:
         return jsonify({'flag': 0, 'message': 'Unit Rent ID parameter is required'}), 400
@@ -354,16 +354,17 @@ def search_unit():
         result = fetchQueryResult(query, parameters)
 
         if result:
-            data = [{
-                'UnitRentID': row[0],
-                'CompanyName': row[1],
-                'BuildingName': row[2],
-                'UnitNumber': row[3],
-                'MonthlyRent': row[4],
-                'SquareFootage': row[5],
-                'AvailableDateForMoveIn': row[6].isoformat(),
-                'AmenitiesList': row[7]  # Convert date to ISO format
-            } for row in result]
+            for row in result:
+                data = {
+                    'UnitRentID': row[0],#
+                    'CompanyName': row[1],#
+                    'BuildingName': row[2],#
+                    'UnitNumber': row[3],#
+                    'MonthlyRent': row[4],#
+                    'SquareFootage': row[5],#
+                    'AvailableDateForMoveIn': row[6].isoformat(),#
+                    'AmenitiesList': row[7]  # 
+                } 
             return jsonify({'flag': 1, 'data': data}), 200
         else:
             return jsonify({'flag': 0, 'data': [], 'message': 'No unit found with the specified ID'}), 200
