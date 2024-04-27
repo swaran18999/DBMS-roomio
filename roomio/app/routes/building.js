@@ -31,5 +31,22 @@ export default Route.extend({
         console.error(err);
       }
     );
+    this.ajaxfw.post('/check_pet_policy_compatibility', {
+      data: {
+        "companyName": company,
+        "buildingName": building
+      }
+    }).then(
+      (res) => {
+        this.controller.set('compatible_pets', res.data);
+      },
+      (err) => {
+        this.controller.set('compatible_pets', []);
+        if (err.status == 401) {
+          this.router.transitionTo('login');
+        }
+        console.error(err);
+      }
+    );
   },
 });

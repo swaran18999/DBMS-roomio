@@ -395,12 +395,13 @@ def search_unit(unit_number):
 
 
 # 2
-@app.route('/check_pet_policy_compatibility', methods=['GET'])
+@app.route('/check_pet_policy_compatibility', methods=['POST'])
 @login_required
 def get_pet_policies():
     username = session['username']
-    company_name = request.args.get('company_name')
-    building_name = request.args.get('building_name')
+    data = request.get_json()
+    company_name = data['companyName']
+    building_name = data['buildingName']
 
     # Validate required parameters
     if not all([username, company_name, building_name]):
@@ -413,6 +414,7 @@ def get_pet_policies():
             pp.buildingname,
             p.PetType,
             p.PetSize,
+            p.petName,
             pp.isAllowed,
             CASE 
                 WHEN pp.isAllowed THEN 'Allowed'
@@ -440,10 +442,11 @@ def get_pet_policies():
                 'BuildingName': row[1],
                 'PetType': row[2],
                 'PetSize': row[3],
-                'IsAllowed': row[4],
-                'PetStatus': row[5],
-                'RegistrationFee': row[6],
-                'MonthlyFee': row[7]
+                'PetName': row[4],
+                'IsAllowed': row[5],
+                'PetStatus': row[6],
+                'RegistrationFee': row[7],
+                'MonthlyFee': row[8]
             } for row in result]
             return jsonify({'flag': 1, 'data': data}), 200
         else:
