@@ -1,9 +1,10 @@
-.search-apartment form{
-	display: flex;
-	align-items: center;
-	width: 800px;
+.search-apartment form {
+  display: flex;
+  align-items: center;
+  width: 800px;
 }
 
-.search-apartment input, button {
-	margin-right: 10px;
+.search-apartment input,
+button {
+  margin-right: 10px;
 }
