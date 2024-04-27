@@ -773,6 +773,92 @@ def get_user_details():
     else:
         return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
 
+@app.route('/add_as_favourite', methods = ['POST'])
+@login_required
+def add_as_favourite():
+
+    data_dict = request.get_json()
+
+    userName = session['username']
+    unitID = data_dict['UnitRentID']
+    
+    query = "INSERT into Favorite (Username, UnitRentID) VALUES (%s, %s);"
+
+    parameters = (userName, unitID)
+
+    result = executeQueryResult(query, parameters)
+
+    if result:
+        return jsonify({'flag': 1, 'data': "Added to fav"}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'Could not add to fav'}), 400
+
+@app.route('/is_favourite/<unitID>', methods = ['GET'])
+@login_required
+def is_favourite(unitID):
+
+    userName = session['username']
+    
+    query = "SELECT * FROM Favorite WHERE Username = %s AND UnitRentID = %s;"
+
+    parameters = (userName, unitID)
+
+    result = fetchQueryResult(query, parameters)
+    
+    if result:
+        return jsonify({'flag': 1, 'isFav': "true"}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'Could not add to fav'}), 404
+
+@app.route('/remove_as_favourite/<unitID>', methods = ['GET'])
+@login_required
+def remove_as_favourite(unitID):
+
+    userName = session['username']
+
+    query = """
+                DELETE FROM Favorite AS F WHERE F.unitrentid = %s AND F.username = %s;
+            """
+    parameters = (unitID, userName)
+
+    result = executeQueryResult(query, parameters)
+    
+    if result:
+        return jsonify({'flag': 1, 'isFav': "false"}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'Could not delete fav'}), 400
+
+
+
+@app.route('/get_user_favourites' , methods = ['GET'])
+@login_required
+def get_user_favourites():
+
+    userName = session['username']
+
+    query = """
+                SELECT F.UnitRentID, A.CompanyName, A.BuildingName, A.unitNumber 
+                FROM Favorite AS F
+                NATURAL JOIN ApartmentUnit AS A
+                WHERE username = %s;
+            """
+
+    parameters = (userName,)
+
+    result = fetchQueryResult(query, parameters)
+
+    if result:
+        row = result[0]
+        data = {
+            'UnitRentID': row[0],
+            'CompanyName': row[1],
+            'BuildingName': row[2],
+            'unitNumber': row[3]
+        }
+        return jsonify({'flag': 1, 'data': data}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'No Favs'}), 404
+
 
 @app.route('/trial')
 def trialAPI():
