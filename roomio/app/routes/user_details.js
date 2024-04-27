@@ -24,5 +24,17 @@ export default Route.extend({
         console.error(err);
       }
     );
+	this.ajaxfw.request('/get_user_favourites').then(
+		(res) => {
+			console.log(res);
+			this.controller.set("favourites", res.data)
+		},
+		(err) => {
+			if (err.status == 401) {
+				this.router.transitionTo('login');
+			}
+			console.error(err);
+		}
+    );  
   },
 });
