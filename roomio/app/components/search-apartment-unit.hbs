@@ -27,7 +27,7 @@
 	{{#each this.searchOutputUnits as |rental|}}
 		<tr>
 			<td>{{rental.CompanyName}}</td>
-			<td>{{rental.BuildingName}}</td>
+			<td><a {{on "click" (action "goToApartment" rental.BuildingName rental.CompanyName)}}>{{rental.BuildingName}}</a></td>
 			<td><a {{on "click" (action "goToUnit" rental.UnitRentID)}}>{{rental.UnitNumber}}</a></td>
 			<td>{{rental.MonthlyRent}}</td>
 			<td>{{rental.SquareFootage}}</td>

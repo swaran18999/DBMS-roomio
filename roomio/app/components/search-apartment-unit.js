@@ -12,6 +12,9 @@ export default Component.extend({
     goToUnit(UnitRentID) {
       this.router.transitionTo('unit', UnitRentID);
     },
+    goToApartment(BuildingName, CompanyName) {
+      this.router.transitionTo('building', CompanyName, BuildingName);
+    },
     searchApartments() {
       this.set('searchOutputUnits', null);
       let data = {

@@ -13,9 +13,10 @@ Router.map(function () {
     this.route('pets');
     this.route('addPets');
   });
-  this.route('unit', {path: '/unit/:unitID'})
+  this.route('unit', { path: '/unit/:unitID' });
   this.route('search');
   this.route('login');
   this.route('signup');
   this.route('api-test');
+  this.route('building', {path: '/building/:company/:building'});
 });
