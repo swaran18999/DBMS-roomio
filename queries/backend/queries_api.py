@@ -107,8 +107,111 @@ def logout():
     return jsonify({'flag' : 1, 'message': "Successfully logged out"})
 
 
+''' 
+Feature 2. Search Apartment
+
 '''
-Feature 2. Register and Update Pet
+@app.route('/search_apartment', methods=['POST'])
+def search_apartment():
+    try:
+        data_dict = request.get_json()
+        company_name = data_dict.get('companyName')
+        building_name = data_dict.get('buildingName')
+        
+        if not company_name or not building_name:
+            return jsonify({'flag': 0, 'message': 'Company name and building name are required'}), 400
+
+        query = """
+            SELECT UnitRentID, CompanyName, BuildingName, UnitNumber, MonthlyRent, SquareFootage, AvailableDateForMoveIn
+            FROM ApartmentUnit
+            WHERE CompanyName = %s AND BuildingName = %s;
+        """
+        parameters = (company_name, building_name)
+
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = []
+            for row in result:
+                data.append({
+                    'UnitRentID': row[0],
+                    'CompanyName': row[1],
+                    'BuildingName': row[2],
+                    'UnitNumber': row[3],
+                    'MonthlyRent': row[4],
+                    'SquareFootage': row[5],
+                    'AvailableDateForMoveIn': row[6].isoformat()  # Convert date to ISO format
+                })
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'data': [], 'message': 'No apartments found for the given company and building'}), 200
+    except Exception as e:
+        print(f"Error searching apartments: {e}")
+        return jsonify({'flag': 0, 'message': 'An error occurred while searching apartments'}), 500
+
+@app.route('/check_pet_policy_compatibility', methods=['POST'])
+@login_required
+def get_pet_policies():
+    username = session['username']
+    data = request.get_json()
+    company_name = data['companyName']
+    building_name = data['buildingName']
+
+    # Validate required parameters
+    if not all([username, company_name, building_name]):
+        return jsonify({'flag': 0, 'message': 'Missing required query parameters'}), 400
+
+    try:
+        query = """
+        SELECT 
+            pp.companyname,
+            pp.buildingname,
+            p.PetType,
+            p.PetSize,
+            p.petName,
+            pp.isAllowed,
+            CASE 
+                WHEN pp.isAllowed THEN 'Allowed'
+                ELSE 'Not Allowed' 
+            END AS PetStatus,
+            pp.RegistrationFee,
+            pp.MonthlyFee
+        FROM 
+            Pets p
+        JOIN 
+            Users u ON p.username = u.username
+        JOIN 
+            PetPolicy pp ON pp.PetType = p.PetType AND pp.PetSize = p.PetSize
+        WHERE 
+            u.username = %s AND 
+            pp.CompanyName = %s AND 
+            pp.BuildingName = %s;
+        """
+        parameters = (username, company_name, building_name)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'CompanyName': row[0],
+                'BuildingName': row[1],
+                'PetType': row[2],
+                'PetSize': row[3],
+                'PetName': row[4],
+                'IsAllowed': row[5],
+                'PetStatus': row[6],
+                'RegistrationFee': row[7],
+                'MonthlyFee': row[8]
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No pet policies found for the specified parameters'}), 404
+    except Exception as e:
+        print(f"Error in fetching pet policies: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+
+'''
+Feature 3. Register and Update Pet
 
 I've kept a put and a post for editing pet info, check which works and go about it
 '''
@@ -220,66 +323,105 @@ def delete_pet():
         print(f"Error deleting pet: {e}")
         return jsonify({'flag': 0, 'message': 'An error occurred while deleting the pet'}), 500
 
-# @app.route('/update_pet/<username>/<pet_name>/<pet_type>', methods=['PUT'])
-# def update_pet(username, pet_name, pet_type):
-#     try:
-#         new_pet_size = request.form['new_pet_size']
-#         new_pet_type = request.form['new_pet_type']
+''' 
+4.
+When viewing a specific apartment unit, the user should be able to view others' interests so that the user can join 
+the interest (You are not required to implement the join feature) or post their interest to the unit.
+'''
 
-#         query = "UPDATE Pets SET PetSize = %s, PetType = %s WHERE username = %s AND PetName = %s AND PetType = %s;"
-#         parameters = (new_pet_size, new_pet_type, username, pet_name, pet_type)
+@app.route('/add_interest', methods=['POST'])
+@login_required
+def add_interest():
+    data = request.get_json()
 
-#         result = executeQueryResult(query, parameters)
+    if not data or 'UnitRentID' not in data or 'RoommateCnt' not in data or 'MoveInDate' not in data:
+        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
+    
+    username = session['username']
+    unit_rent_id = data['UnitRentID']
+    roommate_cnt = data['RoommateCnt']
+    move_in_date = data['MoveInDate']
 
-#         if result:
-#             return jsonify({'flag': 1, 'message': 'Pet updated successfully'}), 200
-#         else:
-#             return jsonify({'flag': 0, 'message': 'Failed to update pet'}), 400
-#     except Exception as e:
-#         print(f"Error updating pet: {e}")
-#         return jsonify({'flag': 0, 'message': 'An error occurred while updating the pet'}), 500
-
-@app.route('/search_apartment', methods=['POST'])
-def search_apartment():
     try:
-        data_dict = request.get_json()
-        company_name = data_dict.get('companyName')
-        building_name = data_dict.get('buildingName')
-        
-        if not company_name or not building_name:
-            return jsonify({'flag': 0, 'message': 'Company name and building name are required'}), 400
-
         query = """
-            SELECT UnitRentID, CompanyName, BuildingName, UnitNumber, MonthlyRent, SquareFootage, AvailableDateForMoveIn
-            FROM ApartmentUnit
-            WHERE CompanyName = %s AND BuildingName = %s;
+        INSERT INTO Interests (username, UnitRentID, RoommateCnt, MoveInDate)
+        VALUES (%s, %s, %s, %s);
         """
-        parameters = (company_name, building_name)
+        parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
+        result, code = executeQueryResult(query, parameters) 
+        if result:
+            return jsonify({'flag': 1, 'message': 'Interest added successfully'}), 201
+        else:
+            if code == 409:
+                print("Duplicate Error. Interest already exists.")
+                return jsonify({'flag' : 0, 'message': 'Duplicate Error. Interest already exists.'}), 409
+            else:
+                print(" Couldn't add interest. !")
+                return jsonify({'flag': 0, 'message': 'Failed to add interest'}), 400
+    except Exception as e:
+        print(f"Error adding interest: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
+@app.route('/view_interests/<unit_number>', methods=['GET'])
+@login_required
+def view_interests(unit_number):
+    # {"UnitRentID":5}
+    # unit_rent_id = request.args.get('UnitRentID')
+    if not unit_number:
+        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
+
+    try:
+        query = """
+        SELECT i.UnitRentID, i.RoommateCnt, i.MoveInDate, u.first_name, u.last_name, u.username
+        FROM Interests i 
+        NATURAL JOIN Users u
+        WHERE i.UnitRentID = %s;
+        """
+        parameters = (unit_number)
         result = fetchQueryResult(query, parameters)
 
         if result:
-            data = []
-            for row in result:
-                data.append({
-                    'UnitRentID': row[0],
-                    'CompanyName': row[1],
-                    'BuildingName': row[2],
-                    'UnitNumber': row[3],
-                    'MonthlyRent': row[4],
-                    'SquareFootage': row[5],
-                    'AvailableDateForMoveIn': row[6].isoformat()  # Convert date to ISO format
-                })
+            data = [{
+                'UnitRentID': row[0],
+                'RoommateCnt': row[1],
+                'MoveInDate': row[2].isoformat(),
+                'FirstName': row[3],
+                'LastName': row[4],
+                'isUser': row[5] == session['username']
+            } for row in result]
             return jsonify({'flag': 1, 'data': data}), 200
         else:
-            return jsonify({'flag': 0, 'data': [], 'message': 'No apartments found for the given company and building'}), 200
+            return jsonify({'flag': 0, 'message': 'No interests found for the specified UnitRentID'}), 404
     except Exception as e:
-        print(f"Error searching apartments: {e}")
-        return jsonify({'flag': 0, 'message': 'An error occurred while searching apartments'}), 500
+        print(f"Error in fetching interests: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/delete_interest', methods=['POST'])
+@login_required
+def delete_interest():
+    data = request.get_json()
+    if not data or 'UnitRentID' not in data or 'RoommateCnt' not in data or 'MoveInDate' not in data:
+        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
+    
+    username = session['username']
+    unit_rent_id = data['UnitRentID']
+    roommate_cnt = data['RoommateCnt']
+    move_in_date = data['MoveInDate']
+
+    try:
+        query = "DELETE FROM Interests WHERE username = %s AND UnitRentID = %s AND RoommateCnt = %s AND MoveInDate = %s;"
+        parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
+        result, code = executeQueryResult(query, parameters)
+
+        return jsonify({'flag': 1, 'message': 'Interest deleted successfully'}), 201
+    except Exception as e:
+        print(f"Error adding interest: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
 
 ''' 
-5. Search by building 
-Search by Unit
+5,11 Search by building 
+Search by Unit, Gets feature 11 too
 Creating useful views 
 
 CREATE VIEW AuExtra as
@@ -407,163 +549,16 @@ def search_unit(unit_number):
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 
-# 2
-@app.route('/check_pet_policy_compatibility', methods=['POST'])
-@login_required
-def get_pet_policies():
-    username = session['username']
-    data = request.get_json()
-    company_name = data['companyName']
-    building_name = data['buildingName']
 
-    # Validate required parameters
-    if not all([username, company_name, building_name]):
-        return jsonify({'flag': 0, 'message': 'Missing required query parameters'}), 400
 
-    try:
-        query = """
-        SELECT 
-            pp.companyname,
-            pp.buildingname,
-            p.PetType,
-            p.PetSize,
-            p.petName,
-            pp.isAllowed,
-            CASE 
-                WHEN pp.isAllowed THEN 'Allowed'
-                ELSE 'Not Allowed' 
-            END AS PetStatus,
-            pp.RegistrationFee,
-            pp.MonthlyFee
-        FROM 
-            Pets p
-        JOIN 
-            Users u ON p.username = u.username
-        JOIN 
-            PetPolicy pp ON pp.PetType = p.PetType AND pp.PetSize = p.PetSize
-        WHERE 
-            u.username = %s AND 
-            pp.CompanyName = %s AND 
-            pp.BuildingName = %s;
-        """
-        parameters = (username, company_name, building_name)
-        result = fetchQueryResult(query, parameters)
-
-        if result:
-            data = [{
-                'CompanyName': row[0],
-                'BuildingName': row[1],
-                'PetType': row[2],
-                'PetSize': row[3],
-                'PetName': row[4],
-                'IsAllowed': row[5],
-                'PetStatus': row[6],
-                'RegistrationFee': row[7],
-                'MonthlyFee': row[8]
-            } for row in result]
-            return jsonify({'flag': 1, 'data': data}), 200
-        else:
-            return jsonify({'flag': 0, 'message': 'No pet policies found for the specified parameters'}), 404
-    except Exception as e:
-        print(f"Error in fetching pet policies: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-''' 
-4.
-When viewing a specific apartment unit, the user should be able to view others' interests so that the user can join 
-the interest (You are not required to implement the join feature) or post their interest to the unit.
+'''
+NOT USED 
+8. 
+Search Interest: The user should be able to search for an interest in a certain unit based on the move-in
+date and roommate count attributes. The user should also be able to have a look at the information of 
+the initiator to decide on whether to contact for renting together.
 '''
 
-@app.route('/add_interest', methods=['POST'])
-@login_required
-def add_interest():
-    data = request.get_json()
-
-    if not data or 'UnitRentID' not in data or 'RoommateCnt' not in data or 'MoveInDate' not in data:
-        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
-    
-    username = session['username']
-    unit_rent_id = data['UnitRentID']
-    roommate_cnt = data['RoommateCnt']
-    move_in_date = data['MoveInDate']
-
-    try:
-        query = """
-        INSERT INTO Interests (username, UnitRentID, RoommateCnt, MoveInDate)
-        VALUES (%s, %s, %s, %s);
-        """
-        parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
-        result, code = executeQueryResult(query, parameters) 
-        if result:
-            return jsonify({'flag': 1, 'message': 'Interest added successfully'}), 201
-        else:
-            if code == 409:
-                print("Duplicate Error. Interest already exists.")
-                return jsonify({'flag' : 0, 'message': 'Duplicate Error. Interest already exists.'}), 409
-            else:
-                print(" Couldn't add interest. !")
-                return jsonify({'flag': 0, 'message': 'Failed to add interest'}), 400
-    except Exception as e:
-        print(f"Error adding interest: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-@app.route('/view_interests/<unit_number>', methods=['GET'])
-@login_required
-def view_interests(unit_number):
-    # {"UnitRentID":5}
-    # unit_rent_id = request.args.get('UnitRentID')
-    if not unit_number:
-        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
-
-    try:
-        query = """
-        SELECT i.UnitRentID, i.RoommateCnt, i.MoveInDate, u.first_name, u.last_name, u.username
-        FROM Interests i 
-        NATURAL JOIN Users u
-        WHERE i.UnitRentID = %s;
-        """
-        parameters = (unit_number)
-        result = fetchQueryResult(query, parameters)
-
-        if result:
-            data = [{
-                'UnitRentID': row[0],
-                'RoommateCnt': row[1],
-                'MoveInDate': row[2].isoformat(),
-                'FirstName': row[3],
-                'LastName': row[4],
-                'isUser': row[5] == session['username']
-            } for row in result]
-            return jsonify({'flag': 1, 'data': data}), 200
-        else:
-            return jsonify({'flag': 0, 'message': 'No interests found for the specified UnitRentID'}), 404
-    except Exception as e:
-        print(f"Error in fetching interests: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-@app.route('/delete_interest', methods=['POST'])
-@login_required
-def delete_interest():
-    data = request.get_json()
-    if not data or 'UnitRentID' not in data or 'RoommateCnt' not in data or 'MoveInDate' not in data:
-        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
-    
-    username = session['username']
-    unit_rent_id = data['UnitRentID']
-    roommate_cnt = data['RoommateCnt']
-    move_in_date = data['MoveInDate']
-
-    try:
-        query = "DELETE FROM Interests WHERE username = %s AND UnitRentID = %s AND RoommateCnt = %s AND MoveInDate = %s;"
-        parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
-        result, code = executeQueryResult(query, parameters)
-
-        return jsonify({'flag': 1, 'message': 'Interest deleted successfully'}), 201
-    except Exception as e:
-        print(f"Error adding interest: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-# 8
 @app.route('/search_interests', methods=['GET'])
 def search_interests():
     # Retrieve query parameters
@@ -603,7 +598,12 @@ def search_interests():
         print(f"Error in fetching interests: {e}")
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
-# 9
+''' 
+9.
+Estimate Monthly Rent Across Zipcode
+'''
+
+
 @app.route('/search_by_zipcode/<zip_code>', methods=['GET'])
 def average_rent_by_xbxb(zip_code):
     # Retrieve the zip code from query parameters
@@ -631,193 +631,9 @@ def average_rent_by_xbxb(zip_code):
         print(f"Error in fetching average rent by XbXb: {e}")
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
-# 11
-# @app.route('/rent_extra_view', methods=['GET'])
-# def rent_extra_view():
-#     # Retrieve the UnitRentID from query parameters
-#     print(request.args)
-#     unit_rent_id = request.args.get('UnitRentID')
-#     if not unit_rent_id:
-#         return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
-
-#     try:
-#         query = """
-#         SELECT au.UnitRentID, au.MonthlyRent, (
-#             SELECT AVG(au2.MonthlyRent)
-#             FROM auextra au2
-#             NATURAL JOIN ApartmentBuilding ab2
-#             WHERE ABS(au.squareFootage - au2.squareFootage) <= 0.10 * au.squareFootage
-#             AND ab2.AddrCity = ab.AddrCity AND au2.UnitRentID != au.UnitRentID) AS Extra_View
-#         FROM
-#         auextra au 
-#         NATURAL JOIN ApartmentBuilding ab
-#         WHERE au.UnitRentID = %s;
-#         """
-#         parameters = (unit_rent_id,)
-#         result = fetchQueryResult(query, parameters)
-
-#         if result:
-#             data = [{
-#                 'UnitRentID': row[0],
-#                 'MonthlyRent': float(row[1]),
-#                 'ExtraView': float(row[2]) if row[2] is not None else None
-#             } for row in result]
-#             return jsonify({'flag': 1, 'data': data}), 200
-#         else:
-#             print("Result was empty")
-#             return jsonify({'flag': 0, 'message': 'No data found for the specified UnitRentID'}), 404
-#     except Exception as e:
-#         print(f"Error in fetching rent extra view: {e}")
-#         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-
-
-def fetchQueryResult(query, parameters):
-    con = psycopg2.connect(
-        database="klzhcbxk",
-        user="klzhcbxk",
-        password="1HbbkUWWZxRHNJR_AkxBUg1Dk_8OMcjx",
-        host="batyr.db.elephantsql.com",
-        port= '5432'
-    )
-    try:
-        cur_object = con.cursor()
-
-        cur_object.execute(query, parameters)
-
-        result = cur_object.fetchall()
-    except Exception as e:
-        print(f"Error occured while processing query {query} \n Error: {e}")
-        result = None
-    return result
-
-def executeQueryResult(query, parameters):
-    con = psycopg2.connect(
-        database="klzhcbxk",
-        user="klzhcbxk",
-        password="1HbbkUWWZxRHNJR_AkxBUg1Dk_8OMcjx",
-        host="batyr.db.elephantsql.com",
-        port= '5432'
-    )
-    try:
-        cur_object = con.cursor()
-        cur_object.execute(query, parameters)
-        con.commit()
-        print("Committed")
-        return True, 200
-    except Exception as e:
-        if "duplicate key value violates unique constraint" in str(e):
-            print("Post call failed due to duplicate key")
-            return False, 409
-        print("Post failed due to",e)
-        return False, 400
-
-# 13 Comment system
-@app.route('/add_comment', methods=['POST'])
-@login_required
-def add_comment():
-    data = request.get_json()
-
-    if not data or 'UnitRentID' not in data or 'Rating' not in data or 'Comment' not in data:
-        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
-    
-    username = session['username']
-    unit_rent_id = data['UnitRentID']
-    rating = data['Rating']
-    comment_text = data['Comment']
-
-    try:
-        query = """
-        INSERT INTO Comments (username, UnitRentID, Rating, Comment)
-        VALUES (%s, %s, %s, %s);
-        """
-        parameters = (username, unit_rent_id, rating, comment_text)
-        result, code = executeQueryResult(query, parameters) 
-
-        return jsonify({'flag': 1, 'message': 'Comment added successfully'}), 201
-    except Exception as e:
-        print(f"Error adding comment: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-@app.route('/view_comments/<unit_number>', methods=['GET'])
-@login_required
-def view_comments(unit_number):
-    if not unit_number:
-        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
-
-    try:
-        query = """
-        SELECT c.UnitRentID, c.Rating, c.Comment, u.first_name, u.last_name, u.username, c.CommentID
-        FROM Comments c 
-        NATURAL JOIN Users u
-        WHERE c.UnitRentID = %s;
-        """
-        parameters = (unit_number,)
-        result = fetchQueryResult(query, parameters)
-
-        if result:
-            data = [{
-                'UnitRentID': row[0],
-                'Rating': row[1],
-                'Comment': row[2],
-                'FirstName': row[3],
-                'LastName': row[4],
-                'UserName': row[5],
-                'CommentID': row[6],
-                'isUser': row[5] == session['username']
-            } for row in result]
-            return jsonify({'flag': 1, 'data': data}), 200
-        else:
-            return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
-    except Exception as e:
-        print(f"Error in fetching comments: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-@app.route('/delete_comment', methods=['POST'])
-@login_required
-def delete_comment():
-    data = request.get_json()
-    
-    username = session['username']
-    CommentID = data['CommentID']
-
-    try:
-        query = "DELETE FROM Comments WHERE username = %s AND CommentID = %s;"
-        parameters = (username, CommentID)
-        result, code = executeQueryResult(query, parameters)
-
-        return jsonify({'flag': 1, 'message': 'Comment deleted successfully'}), 200
-    except Exception as e:
-        print(f"Error deleting comment: {e}")
-        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
-
-@app.route('/get_user_details' , methods = ['GET'])
-@login_required
-def get_user_details():
-
-    userName = session['username']
-
-    query = "SELECT username, first_name, last_name, DOB, gender, email, Phone, passwd FROM Users WHERE username = %s;"
-
-    parameters = (userName,)
-
-    result = fetchQueryResult(query, parameters)
-
-    if result:
-        row = result[0]
-        data = {
-            'UserName': row[0],
-            'FirstName': row[1],
-            'LastName': row[2],
-            'DOB': row[3].isoformat(),
-            'Gender': "Not Known" if row[4] == 0 else "Male" if row[4] == 1 else "Female" if row[4] == 2 else "Not Applicable",
-            'Email': row[5],
-            'Phone': row[6]
-        }
-        return jsonify({'flag': 1, 'data': data}), 200
-    else:
-        return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
-
+'''
+Feautre 10. Favorites 
+'''
 @app.route('/add_as_favourite', methods = ['POST'])
 @login_required
 def add_as_favourite():
@@ -903,6 +719,159 @@ def get_user_favourites():
     else:
         return jsonify({'flag': 0, 'message': 'No Favs'}), 404
 
+
+''' 
+Feature 13. Comment System
+'''
+
+
+@app.route('/add_comment', methods=['POST'])
+@login_required
+def add_comment():
+    data = request.get_json()
+
+    if not data or 'UnitRentID' not in data or 'Rating' not in data or 'Comment' not in data:
+        return jsonify({'flag': 0, 'message': 'Missing required parameters'}), 400
+    
+    username = session['username']
+    unit_rent_id = data['UnitRentID']
+    rating = data['Rating']
+    comment_text = data['Comment']
+
+    try:
+        query = """
+        INSERT INTO Comments (username, UnitRentID, Rating, Comment)
+        VALUES (%s, %s, %s, %s);
+        """
+        parameters = (username, unit_rent_id, rating, comment_text)
+        result, code = executeQueryResult(query, parameters) 
+
+        return jsonify({'flag': 1, 'message': 'Comment added successfully'}), 201
+    except Exception as e:
+        print(f"Error adding comment: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/view_comments/<unit_number>', methods=['GET'])
+@login_required
+def view_comments(unit_number):
+    if not unit_number:
+        return jsonify({'flag': 0, 'message': 'UnitRentID parameter is required'}), 400
+
+    try:
+        query = """
+        SELECT c.UnitRentID, c.Rating, c.Comment, u.first_name, u.last_name, u.username, c.CommentID
+        FROM Comments c 
+        NATURAL JOIN Users u
+        WHERE c.UnitRentID = %s;
+        """
+        parameters = (unit_number,)
+        result = fetchQueryResult(query, parameters)
+
+        if result:
+            data = [{
+                'UnitRentID': row[0],
+                'Rating': row[1],
+                'Comment': row[2],
+                'FirstName': row[3],
+                'LastName': row[4],
+                'UserName': row[5],
+                'CommentID': row[6],
+                'isUser': row[5] == session['username']
+            } for row in result]
+            return jsonify({'flag': 1, 'data': data}), 200
+        else:
+            return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
+    except Exception as e:
+        print(f"Error in fetching comments: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+@app.route('/delete_comment', methods=['POST'])
+@login_required
+def delete_comment():
+    data = request.get_json()
+    
+    username = session['username']
+    CommentID = data['CommentID']
+
+    try:
+        query = "DELETE FROM Comments WHERE username = %s AND CommentID = %s;"
+        parameters = (username, CommentID)
+        result, code = executeQueryResult(query, parameters)
+
+        return jsonify({'flag': 1, 'message': 'Comment deleted successfully'}), 200
+    except Exception as e:
+        print(f"Error deleting comment: {e}")
+        return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
+
+
+
+def fetchQueryResult(query, parameters):
+    con = psycopg2.connect(
+        database="klzhcbxk",
+        user="klzhcbxk",
+        password="1HbbkUWWZxRHNJR_AkxBUg1Dk_8OMcjx",
+        host="batyr.db.elephantsql.com",
+        port= '5432'
+    )
+    try:
+        cur_object = con.cursor()
+
+        cur_object.execute(query, parameters)
+
+        result = cur_object.fetchall()
+    except Exception as e:
+        print(f"Error occured while processing query {query} \n Error: {e}")
+        result = None
+    return result
+
+def executeQueryResult(query, parameters):
+    con = psycopg2.connect(
+        database="klzhcbxk",
+        user="klzhcbxk",
+        password="1HbbkUWWZxRHNJR_AkxBUg1Dk_8OMcjx",
+        host="batyr.db.elephantsql.com",
+        port= '5432'
+    )
+    try:
+        cur_object = con.cursor()
+        cur_object.execute(query, parameters)
+        con.commit()
+        print("Committed")
+        return True, 200
+    except Exception as e:
+        if "duplicate key value violates unique constraint" in str(e):
+            print("Post call failed due to duplicate key")
+            return False, 409
+        print("Post failed due to",e)
+        return False, 400
+
+
+@app.route('/get_user_details' , methods = ['GET'])
+@login_required
+def get_user_details():
+
+    userName = session['username']
+
+    query = "SELECT username, first_name, last_name, DOB, gender, email, Phone, passwd FROM Users WHERE username = %s;"
+
+    parameters = (userName,)
+
+    result = fetchQueryResult(query, parameters)
+
+    if result:
+        row = result[0]
+        data = {
+            'UserName': row[0],
+            'FirstName': row[1],
+            'LastName': row[2],
+            'DOB': row[3].isoformat(),
+            'Gender': "Not Known" if row[4] == 0 else "Male" if row[4] == 1 else "Female" if row[4] == 2 else "Not Applicable",
+            'Email': row[5],
+            'Phone': row[6]
+        }
+        return jsonify({'flag': 1, 'data': data}), 200
+    else:
+        return jsonify({'flag': 0, 'message': 'No comments found for the specified UnitRentID'}), 404
 
 @app.route('/trial')
 def trialAPI():
