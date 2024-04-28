@@ -80,6 +80,9 @@ export default class UserPetsRoute extends Route {
           this.fetchPets();
         },
         (err) => {
+          if (err.status == 409) {
+            set(pet, "is_duplicate", true);
+          }
           if (err.status == 401) {
             this.router.transitionTo('login');
           }

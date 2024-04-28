@@ -81,6 +81,12 @@
 						<span {{on "click" (action "savePets" pet target=this.currentRoute)}}>
 							{{svg-jar "done" class="icon-green icon-clickable"}}
 						</span>
+						{{#if (eq pet.is_duplicate true)}}
+							<span class="tooltip">
+								{{svg-jar "info" class="icon-orange icon-clickable"}}
+								<span class="tooltiptext">Duplicate pet found!</span>
+							</span>
+						{{/if}}
 						<span {{on "click" (action "cancelEdit" pet target=this.currentRoute)}}>
 							{{svg-jar "close" class="icon-red icon-clickable"}}
 						</span>
