@@ -19,6 +19,9 @@ export default Component.extend({
   init() {
     this._super(...arguments);
     this.set('newGender', '0');
+    let currentDate = new Date();
+    currentDate = currentDate.toISOString().substring(0, 10);
+    this.set("today", currentDate)
   },
   actions: {
     genderClicked(event) {

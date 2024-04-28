@@ -39,6 +39,9 @@ export default Route.extend({
   setupController(controller) {
     controller.set('currentRoute', this);
     controller.set("rating", 3);
+    let currentDate = new Date();
+    currentDate = currentDate.toISOString().substring(0, 10);
+    controller.set("today", currentDate)
   },
   getInterests(unitID) {
     this.ajaxfw.request('/view_interests/' + unitID).then(
