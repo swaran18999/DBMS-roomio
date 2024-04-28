@@ -13,6 +13,7 @@ Router.map(function () {
     this.route('pets');
     this.route('addPets');
   });
+  this.route('user_details');
   this.route('unit', { path: '/unit/:unitID' });
   this.route('search');
   this.route('login');

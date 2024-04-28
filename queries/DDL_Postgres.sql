@@ -117,3 +117,11 @@ CREATE TABLE Comments (
     FOREIGN KEY (Username) REFERENCES Users(username),
     FOREIGN KEY (UnitRentID) REFERENCES ApartmentUnit(UnitRentID)
 );
+
+CREATE TABLE Favorite (
+    Username VARCHAR(255) NOT NULL,
+    UnitRentID INT NOT NULL,
+    FOREIGN KEY (Username) REFERENCES Users(username),
+    FOREIGN KEY (UnitRentID) REFERENCES ApartmentUnit(UnitRentID)
+    PRIMARY KEY (Username, UnitRentID)
+);
