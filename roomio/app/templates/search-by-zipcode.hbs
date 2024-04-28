@@ -1,7 +1,7 @@
 {{page-title "SearchByZipcode"}}
 <div>
 	<h2>Search by Zipcode</h2>
-	<div class="search-by-zipcode">
+	<div class="search-apartment">
     <form {{action "search_by_zipcode" on="submit"}}>
 			<Input @type="text" @value={{this.zipcode}} placeholder="Enter Zipcode" required />
 			<button type="submit">Search</button>
@@ -22,8 +22,8 @@
 	<tbody>
 	{{#each this.searchOutput as |rental|}}
 		<tr>
-			<td>{{rental.xbxb}}</td>
-			<td>{{rental.avgmonthlyrent}}</td>
+			<td>{{rental.XbXb}}</td>
+			<td>{{rental.AverageMonthlyRent}}</td>
 		</tr>
 	{{/each}}
 	</tbody>
