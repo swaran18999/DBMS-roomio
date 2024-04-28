@@ -581,10 +581,10 @@ def search_interests():
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
 
 # 9
-@app.route('/average_rent_by_zipcode', methods=['GET'])
-def average_rent_by_xbxb():
+@app.route('/search_by_zipcode/<zip_code>', methods=['GET'])
+def average_rent_by_xbxb(zip_code):
     # Retrieve the zip code from query parameters
-    zip_code = request.args.get('zip_code')
+    # zip_code = request.args.get('zip_code')
     if not zip_code:
         return jsonify({'flag': 0, 'message': 'Zip code parameter is required'}), 400
 
