@@ -47,6 +47,7 @@ export default Route.extend({
         this.controller.set("interests", res.data)
       },
       (err) => {
+        this.controller.set("interests", null)
         if (err.status == 401) {
           this.router.transitionTo('login');
         }
