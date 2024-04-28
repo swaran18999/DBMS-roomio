@@ -350,13 +350,13 @@ def search_unit(unit_number):
     print('here',unit_rent_id)
     if not unit_rent_id:
         return jsonify({'flag': 0, 'message': 'Unit Rent ID parameter is required'}), 400
-
+    
     try:
         query = """
         SELECT au.UnitRentID, ab.companyname, ab.buildingname, au.unitNumber, au.MonthlyRent, au.squareFootage, au.AvailableDateForMoveIn, ao.amenitieslist,
             COALESCE(
                 (
-                    SELECT AVG(au2.MonthlyRent)
+                    SELECT ROUND(AVG(au2.MonthlyRent)::numeric, 2)
                     FROM auextra au2
                     NATURAL JOIN ApartmentBuilding ab2
                     WHERE ABS(au.squareFootage - au2.squareFootage) <= 0.10 * au.squareFootage
@@ -593,7 +593,7 @@ def average_rent_by_xbxb(zip_code):
 
     try:
         query = """
-        SELECT au.XbXb, AVG(au.MonthlyRent) AS AverageMonthlyRent
+        SELECT au.XbXb, ROUND(AVG(au.MonthlyRent)::numeric, 2) AS AverageMonthlyRent
         FROM AuExtra au 
         NATURAL JOIN ApartmentBuilding ab
         WHERE ab.AddrZipCode = %s
