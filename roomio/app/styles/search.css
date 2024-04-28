@@ -8,3 +8,14 @@
 button {
   margin-right: 10px;
 }
+
+.search-zipcode form {
+  display: flex;
+  align-items: center;
+  width: 400px;
+}
+
+.search-zipcode input,
+button {
+  margin-right: 10px;
+}

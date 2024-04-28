@@ -22,5 +22,8 @@
       <option value="Large">Large</option>
     </select>
   </div>
+  {{#if this.errorMessage}}
+    <div class="error-message" style="padding: 0px 0px 10px 0px;">{{this.errorMessage}}</div>
+  {{/if}}
 	<button type="button" {{action "savePetDetails"}}>Save</button>
 </div>

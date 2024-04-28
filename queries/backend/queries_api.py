@@ -66,7 +66,7 @@ def signup():
     else:
         if code == 409:
             print("Duplicate Error!")
-            return jsonify({'flag' : 0, 'message': 'Error. Username already exists.'})
+            return jsonify({'flag' : 0, 'message': 'Error. Username already exists.'}), code
         else:
             print("Registration Unsuccessful !")
             return jsonify({'flag' : 0})

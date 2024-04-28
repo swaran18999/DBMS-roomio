@@ -49,10 +49,13 @@
 
 
 <div class="search-apartment">
-<form {{action "markAsInterested" on="submit"}} style="width:700px">
+<form {{action "markAsInterested" on="submit"}}>
 	<Input @type="date" @value={{this.moveInDate}} style="width: 120px" required />
 	<Input @type="text" @value={{this.roommatesCount}} placeholder="No. of roommates" style="width: 120px" required />
 	<button type="submit" style="width:250px;">Mark as Interested</button>
+    {{#if this.errorMessage}}
+      <span class="error-message">{{this.errorMessage}}</span>
+    {{/if}}
 </form>
 </div>
 

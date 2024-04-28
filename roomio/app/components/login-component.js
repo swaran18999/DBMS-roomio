@@ -19,7 +19,7 @@ export default Component.extend({
           (res) => {
             console.log(res);
             if (res.flag == 1) {
-              this.router.transitionTo('home');
+              this.router.transitionTo('user_details');
             } else {
               this.set(
                 'errorMessage',

@@ -30,8 +30,16 @@ export default Component.extend({
           (res) => {
             console.log(res);
             console.log('Saved successfully');
+            this.router.transitionTo("user.pets");
           },
           (err) => {
+            console.log(err.statusCode);
+            if(err.status == 409) {
+              this.set(
+                'errorMessage',
+                'This pet already exist!'
+              );
+            }
             console.error(err);
           }
         );

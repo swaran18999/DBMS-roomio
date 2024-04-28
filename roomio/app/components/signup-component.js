@@ -60,11 +60,23 @@ export default Component.extend({
               this.set('signupSuccess', true);
             },
             (err) => {
+              if(err.status == 409) {
+                this.set(
+                  'signupError',
+                  'This username already exist!'
+                );
+              }
               console.log(err);
             }
           );
         } catch (error) {
           this.set('signupError', error.message);
+          if(error.status == 409) {
+            this.set(
+              'signupError',
+              'This username already exist!'
+            );
+          }
         }
       }
     },

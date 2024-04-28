@@ -190,6 +190,12 @@ export default Route.extend({
           this.getInterests(unitID);
         },
         (err) => {
+          if(err.status == 409) {
+            this.controller.set(
+              'errorMessage',
+              'An interest in this unit already exist!'
+            );
+          }
           if (err.status == 401) {
             this.router.transitionTo('login');
           }
