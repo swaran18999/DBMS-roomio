@@ -56,17 +56,21 @@ def signup():
 
     parameters = (userName, firstName, lastName, dob, gender, email, phone, enc_password)
 
-    result = executeQueryResult(query, parameters)
+    result, code = executeQueryResult(query, parameters)
 
-    if result == True:
+    if result is True:
         print('Register Successful !')
         return jsonify({
             'flag': 1,
             'message': 'Signup successfull'
         })
     else:
-        print("Registration Unsuccessful !")
-        return jsonify({'flag' : 0})
+        if code == 409:
+            print("Duplicate Error!")
+            return jsonify({'flag' : 0, 'message': 'Error. Username already exists.'})
+        else:
+            print("Registration Unsuccessful !")
+            return jsonify({'flag' : 0})
 
 @app.route('/login' , methods = ['POST'])
 def login():
@@ -141,16 +145,20 @@ def register_pet():
         pet_type = data_dict['pet_type']
         pet_size = data_dict['pet_size']
         username = session['username']
-
+    
         query = "INSERT INTO Pets (PetName, PetType, PetSize, username) VALUES (%s, %s, %s, %s);"
         parameters = (pet_name, pet_type, pet_size, username)
-
-        result = executeQueryResult(query, parameters)
-
+        result, code = executeQueryResult(query, parameters)
         if result:
             return jsonify({'flag': 1, 'message': 'Pet registered successfully'}), 200
         else:
-            return jsonify({'flag': 0, 'message': 'Failed to register pet'}), 400
+            if code == 409:
+                print("Duplicate Error. Pet already exists.")
+                return jsonify({'flag' : 0, 'message': 'Duplicate Error. Pet already exists.'}), 409
+            else:
+                print("Registration Unsuccessful !")
+                return jsonify({'flag': 0, 'message': 'Failed to register pet'}), 400
+            
     except Exception as e:
         print(f"Error registering pet: {e}")
         return jsonify({'flag': 0, 'message': 'An error occurred while registering the pet'}), 500
@@ -171,12 +179,18 @@ def update_pet():
         query = "UPDATE Pets SET PetSize = %s, PetType = %s WHERE username = %s AND PetName = %s AND PetType = %s;"
         parameters = (new_pet_size, new_pet_type, username, pet_name, pet_type)
 
-        result = executeQueryResult(query, parameters)
+        result, code = executeQueryResult(query, parameters)
 
         if result:
             return jsonify({'flag': 1, 'message': 'Pet updated successfully'}), 200
         else:
-            return jsonify({'flag': 0, 'message': 'Failed to update pet'}), 400
+            if code == 409:
+                print("Duplicate Error. Pet already exists.")
+                return jsonify({'flag' : 0, 'message': 'Duplicate Error. Pet already exists.'}), 409
+            else:
+                print("Updation Unsuccessful !")
+                return jsonify({'flag': 0, 'message': 'Failed to update pet'}), 400
+            
     except Exception as e:
         print(f"Error updating pet: {e}")
         return jsonify({'flag': 0, 'message': 'An error occurred while updating the pet'}), 500
@@ -197,7 +211,7 @@ def delete_pet():
         query = "DELETE FROM Pets WHERE username = %s AND PetName = %s AND PetType = %s;"
         parameters = (username, pet_name, pet_type)
 
-        result = executeQueryResult(query, parameters)
+        result, code = executeQueryResult(query, parameters)
 
         if result:
             return jsonify({'flag': 1, 'message': 'Pet deleted successfully'}), 200
@@ -480,9 +494,16 @@ def add_interest():
         VALUES (%s, %s, %s, %s);
         """
         parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
-        executeQueryResult(query, parameters) 
-
-        return jsonify({'flag': 1, 'message': 'Interest added successfully'}), 201
+        result, code = executeQueryResult(query, parameters) 
+        if result:
+            return jsonify({'flag': 1, 'message': 'Interest added successfully'}), 201
+        else:
+            if code == 409:
+                print("Duplicate Error. Interest already exists.")
+                return jsonify({'flag' : 0, 'message': 'Duplicate Error. Interest already exists.'}), 409
+            else:
+                print(" Couldn't add interest. !")
+                return jsonify({'flag': 0, 'message': 'Failed to add interest'}), 400
     except Exception as e:
         print(f"Error adding interest: {e}")
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
@@ -536,9 +557,9 @@ def delete_interest():
     try:
         query = "DELETE FROM Interests WHERE username = %s AND UnitRentID = %s AND RoommateCnt = %s AND MoveInDate = %s;"
         parameters = (username, unit_rent_id, roommate_cnt, move_in_date)
-        executeQueryResult(query, parameters)
+        result, code = executeQueryResult(query, parameters)
 
-        return jsonify({'flag': 1, 'message': 'Interest added successfully'}), 201
+        return jsonify({'flag': 1, 'message': 'Interest deleted successfully'}), 201
     except Exception as e:
         print(f"Error adding interest: {e}")
         return jsonify({'flag': 0, 'message': f'An error occurred: {e}'}), 500
@@ -681,15 +702,16 @@ def executeQueryResult(query, parameters):
     )
     try:
         cur_object = con.cursor()
-
         cur_object.execute(query, parameters)
-
         con.commit()
-
-        return True
+        print("Committed")
+        return True, 200
     except Exception as e:
+        if "duplicate key value violates unique constraint" in str(e):
+            print("Post call failed due to duplicate key")
+            return False, 409
         print("Post failed due to",e)
-        return False
+        return False, 400
 
 # 13 Comment system
 @app.route('/add_comment', methods=['POST'])
@@ -711,7 +733,7 @@ def add_comment():
         VALUES (%s, %s, %s, %s);
         """
         parameters = (username, unit_rent_id, rating, comment_text)
-        executeQueryResult(query, parameters) 
+        result, code = executeQueryResult(query, parameters) 
 
         return jsonify({'flag': 1, 'message': 'Comment added successfully'}), 201
     except Exception as e:
@@ -763,7 +785,7 @@ def delete_comment():
     try:
         query = "DELETE FROM Comments WHERE username = %s AND CommentID = %s;"
         parameters = (username, CommentID)
-        executeQueryResult(query, parameters)
+        result, code = executeQueryResult(query, parameters)
 
         return jsonify({'flag': 1, 'message': 'Comment deleted successfully'}), 200
     except Exception as e:
@@ -810,7 +832,7 @@ def add_as_favourite():
 
     parameters = (userName, unitID)
 
-    result = executeQueryResult(query, parameters)
+    result, code = executeQueryResult(query, parameters)
 
     if result:
         return jsonify({'flag': 1, 'data': "Added to fav"}), 200
@@ -845,7 +867,7 @@ def remove_as_favourite(unitID):
             """
     parameters = (unitID, userName)
 
-    result = executeQueryResult(query, parameters)
+    result, code = executeQueryResult(query, parameters)
     
     if result:
         return jsonify({'flag': 1, 'isFav': "false"}), 200
