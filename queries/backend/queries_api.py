@@ -19,8 +19,6 @@ def getEncryptedPassword(password):
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        print("######")
-        print(session)
         if 'username' not in session or session['username'] == None:
             return jsonify({'flag': 2, 'message': 'User not authenticated'}), 401
         return f(*args, **kwargs)
@@ -88,9 +86,6 @@ def login():
         session['email'] = result[0][1]
         session['loggedIn'] = True
 
-        print("Logged in ")
-        print(session)
-
         return jsonify({
             'flag': 1,
             'message': "Successfully logged in"
@@ -101,10 +96,9 @@ def login():
 
 @app.route('/logout', methods = ['POST'])
 def logout():
-    print(session)
-    # session['username'] = None
-    # session['email'] = None
-    # session['loggedIn'] = False
+    session['username'] = None
+    session['email'] = None
+    session['loggedIn'] = False
 
     return jsonify({'flag' : 1, 'message': "Successfully logged out"})
 
