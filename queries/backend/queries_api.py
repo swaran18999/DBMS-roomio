@@ -1,12 +1,11 @@
 import flask 
-from flask import Flask , render_template, request, redirect, url_for, jsonify
+from flask import Flask , session, render_template, request, redirect, url_for, jsonify
 import psycopg2, hashlib, os
 from flask_cors import CORS
 import json
 from urllib.parse import unquote
 from functools import wraps
 
-session = {}
 
 app = Flask(__name__) 
 app.secret_key = os.urandom(24)
@@ -20,6 +19,8 @@ def getEncryptedPassword(password):
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        print("######")
+        print(session)
         if 'username' not in session or session['username'] == None:
             return jsonify({'flag': 2, 'message': 'User not authenticated'}), 401
         return f(*args, **kwargs)
@@ -87,6 +88,9 @@ def login():
         session['email'] = result[0][1]
         session['loggedIn'] = True
 
+        print("Logged in ")
+        print(session)
+
         return jsonify({
             'flag': 1,
             'message': "Successfully logged in"
@@ -97,9 +101,10 @@ def login():
 
 @app.route('/logout', methods = ['POST'])
 def logout():
-    session['username'] = None
-    session['email'] = None
-    session['loggedIn'] = False
+    print(session)
+    # session['username'] = None
+    # session['email'] = None
+    # session['loggedIn'] = False
 
     return jsonify({'flag' : 1, 'message': "Successfully logged out"})
 
