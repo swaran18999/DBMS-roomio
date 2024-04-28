@@ -21,4 +21,4 @@
 - Wrote Ember code for Features: 5,9,11
 - Wrote python backend for Features : 2*,3*,4*,5,9,10*,11
 
-* = Broke down a task into subproblems and handled it together
+"*" = Broke down a task into subproblems and handled it together
