@@ -1,3 +1,4 @@
+
 # DBMS-roomio Team
 
 ## Team Members
@@ -7,14 +8,17 @@
 ## Distribution of Work
 
 ### Swaran Iyappan
-- Implemented Feature 5 (EmberJS stuff)
-- Emberjs
-- Flask to DB connecter code
-- Ember to Flask connecter code
+- Set up frontend and Ember
+- Set up Ember to Flask connecter code
+- Implemented Ember related features for 1,2,3,4,6,10,13
+- Implemented Python backend parts for 1,2*,3*,4*,6,10*,13
+
 
 ### Ajay Krishnan Gopalan
-- Formulated Insert queries
 - Wrote DDL for PostgreSQL
-- Set up ElephantSQL
-- Implemented Feature 3 
-- Did minimal backend
+- Set up Elephant SQL
+- Set up Flask to DB connecter code, error handling
+- Wrote Ember code for Features: 5,9,11
+- Wrote python backend for Features : 2*,3*,4*,5,9,10*,11
+
+"*" = Broke down a task into subproblems and handled it together

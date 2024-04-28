@@ -1,0 +1,57 @@
+{{page-title "SearchByZipcode"}}
+<div>
+	<h2>Search by Zipcode</h2>
+	<div class="search-apartment">
+    <form {{action "search_by_zipcode" on="submit"}}>
+			<Input @type="text" @value={{this.zipcode}} placeholder="Enter Zipcode" required />
+			<button type="submit">Search</button>
+    </form>
+	</div>
+</div>
+<table>
+{{#if (eq this.hasZipcodeData false)}}
+<div class="none-found">No Units Found!!</div>
+{{/if}}
+{{#if (eq this.hasZipcodeData true)}}
+	<thead>
+	<tr>
+		<th>XbXb</th>
+		<th>Average Monthly Rent</th>
+	</tr>
+	</thead>
+	<tbody>
+	{{#each this.searchOutput as |rental|}}
+		<tr>
+			<td>{{rental.XbXb}}</td>
+			<td>{{rental.AverageMonthlyRent}}</td>
+		</tr>
+	{{/each}}
+	</tbody>
+{{/if}}
+</table>
+{{outlet}}
+
+
+
+{{!-- <table>
+{{#if (eq this.searchOutput.length 0)}}
+<div class="none-found">No Units Found!!</div>
+{{/if}}
+{{#if (and (not-eq this.searchOutput.length undefined) (not-eq this.searchOutput.length 0))}}
+	<thead>
+	<tr>
+		<th>XbXb</th>
+		<th>Average Monthly Rent</th>
+	</tr>
+	</thead>
+	<tbody>
+	{{#each this.searchOutput as |rental|}}
+		<tr>
+			<td>{{rental.xbxb}}</td>
+			<td>{{rental.avgmonthlyrent}}</td>
+		</tr>
+	{{/each}}
+	</tbody>
+{{/if}}
+</table> --}}
+{{outlet}}

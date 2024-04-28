@@ -19,5 +19,6 @@ Router.map(function () {
   this.route('login');
   this.route('signup');
   this.route('api-test');
-  this.route('building', {path: '/building/:company/:building'});
+  this.route('building', { path: '/building/:company/:building' });
+  this.route('search-by-zipcode');
 });
