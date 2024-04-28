@@ -1,12 +1,11 @@
 import flask 
-from flask import Flask , render_template, request, redirect, url_for, jsonify
+from flask import Flask , session, render_template, request, redirect, url_for, jsonify
 import psycopg2, hashlib, os
 from flask_cors import CORS
 import json
 from urllib.parse import unquote
 from functools import wraps
 
-session = {}
 
 app = Flask(__name__) 
 app.secret_key = os.urandom(24)
